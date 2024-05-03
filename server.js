@@ -1,14 +1,22 @@
 import dotenv from 'dotenv';
 import express from 'express';
 
+import db from './src/config/db.js';
+import usersRouter from './src/routes/users/users.js';
+
 async function server() {
-  // Load environment variables from .env file
   dotenv.config();
 
+  db();
   const app = express();
+  app.use(express.json());
 
-  const port = process.env.PORT || 3000; // Use port from environment variable or default to 3000
+  app.get('/', (req, res) => {
+    res.send('yehey');
+  });
 
+  app.use('/api/v1', usersRouter);
+  const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`Listening to Port: ${port}`);
   });
