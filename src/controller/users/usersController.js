@@ -1,5 +1,6 @@
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
+
 const getUsers = async (req, res) => {
   try {
     const usersData = await User.find().sort({ created_at: 'desc' });
@@ -31,7 +32,7 @@ const registerUser = async (req, res) => {
     );
 
     const newUser = new User({
-      userName: userName,
+      userName: userName.trim(), // userName should be trimmed so that it can be unique and removes whitespaces.
       firstName: firstName,
       lastName: lastName,
       password: hashedSaltedPassword,
@@ -43,7 +44,6 @@ const registerUser = async (req, res) => {
       .status(201)
       .json({ message: 'User created successfully', user: newUser });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: 'Something went wrong!',
     });
