@@ -3,7 +3,10 @@ import bcrypt from 'bcryptjs';
 
 const getUsers = async (req, res) => {
   try {
-    const usersData = await User.find().sort({ created_at: 'desc' });
+    const usersData = await User.find({}, { password: 0 }).sort({
+      created_at: 'desc',
+    });
+
     return res.status(200).json(usersData);
   } catch (error) {
     return res.status(500).json({
