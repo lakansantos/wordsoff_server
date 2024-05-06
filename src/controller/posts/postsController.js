@@ -1,13 +1,17 @@
 import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
+import User from '../../models/users/userModel.js';
 
 const addPost = async (req, res) => {
   const user_id = req.user_id;
   const { title, message } = req.body;
 
   try {
+    const user = await User.findOne({ user_id });
+
     const newPost = new Post({
       user_id,
+      user_name: user.user_name,
       title,
       message,
     });

@@ -7,6 +7,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    user_name: {
+      type: String,
+      required: true,
+    },
     post_id: {
       type: String,
       default: () => new UUID(),

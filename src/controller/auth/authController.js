@@ -10,9 +10,9 @@ const convertToToken = (data) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { userName, password } = req.body;
+    const { user_name, password } = req.body;
 
-    const user = await User.findOne({ userName });
+    const user = await User.findOne({ user_name });
 
     if (!user) {
       return res.status(404).json({

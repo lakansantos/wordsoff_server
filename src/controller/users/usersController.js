@@ -45,18 +45,16 @@ const registerUser = async (req, res) => {
 
     await newUser.save();
 
-    return res
-      .status(201)
-      .json({
-        message: 'User created successfully',
-        user: {
-          userName: newUser.user_name,
-          first_name: newUser.first_name,
-          last_name: newUser.last_name,
-        },
-      });
+    return res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        user_name: newUser.user_name,
+        first_name: newUser.first_name,
+        last_name: newUser.last_name,
+        user_id: newUser.user_id,
+      },
+    });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: 'Something went wrong!',
     });
