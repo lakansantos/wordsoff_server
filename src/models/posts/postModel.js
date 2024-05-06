@@ -4,8 +4,7 @@ import mongoose from 'mongoose';
 const postModel = new mongoose.Schema({
   user_id: {
     type: String,
-    ref: 'User',
-    match: 'user_id',
+    required: true,
   },
   post_id: {
     type: String,
@@ -15,11 +14,11 @@ const postModel = new mongoose.Schema({
     type: String,
     required: true,
   },
-  post_content: {
+  message: {
     type: String,
     required: true,
   },
-  post_image_url: {
+  message_image_url: {
     type: String,
     required: false,
   },
