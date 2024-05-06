@@ -3,7 +3,10 @@ import bcrypt from 'bcryptjs';
 
 const getUsers = async (req, res) => {
   try {
-    const usersData = await User.find({}, { password: 0 }).sort({
+    const usersData = await User.find(
+      {},
+      'created_at updated_at userName user_id -_id comments',
+    ).sort({
       created_at: 'desc',
     });
 
@@ -47,6 +50,7 @@ const registerUser = async (req, res) => {
       .status(201)
       .json({ message: 'User created successfully', user: newUser });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message: 'Something went wrong!',
     });

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import { UUID } from 'mongodb';
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -18,6 +18,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    comments: {
+      type: Array,
+      required: false,
+    },
+    user_id: {
+      type: String,
+      default: () => new UUID(),
+    },
   },
   {
     timestamps: {
@@ -32,11 +40,8 @@ userSchema.virtual('');
 
 userSchema.set('toJSON', {
   transform: function (_, ret) {
-    ret.user_id = ret._id;
     ret.created_at = ret.created_at.getTime();
     ret.updated_at = ret.updated_at.getTime();
-    delete ret._id;
-    delete ret._v;
   },
 });
 const User =
