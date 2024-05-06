@@ -1,12 +1,11 @@
+import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
 
+const excludedFields = { password: 0, _id: 0, __v: 0 };
 const getUsers = async (req, res) => {
   try {
-    const usersData = await User.find(
-      {},
-      'created_at updated_at userName user_id -_id comments',
-    ).sort({
+    const usersData = await User.find({}, excludedFields).sort({
       created_at: 'desc',
     });
 
@@ -57,4 +56,29 @@ const registerUser = async (req, res) => {
   }
 };
 
-export { getUsers, registerUser };
+const viewUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findOne(
+      { user_id: userId },
+      excludedFields,
+    );
+
+    if (!user)
+      return res.status(404).json({
+        message: 'User not found.',
+      });
+
+    return res.status(200).json({
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { getUsers, registerUser, viewUser };
