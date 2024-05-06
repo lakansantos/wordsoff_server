@@ -31,8 +31,8 @@ const loginUser = async (req, res) => {
     }
 
     return res.status(201).json({
-      user_id: user._id,
-      token: convertToToken({ id: user._id }),
+      user_id: user.user_id,
+      token: convertToToken({ user_id: user.user_id }),
     });
   } catch (error) {
     res.status(500).json({
