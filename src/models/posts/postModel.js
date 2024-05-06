@@ -1,29 +1,48 @@
 import { UUID } from 'mongodb';
 import mongoose from 'mongoose';
 
-const postModel = new mongoose.Schema({
-  user_id: {
-    type: String,
-    required: true,
+const postSchema = new mongoose.Schema(
+  {
+    user_id: {
+      type: String,
+      required: true,
+    },
+    post_id: {
+      type: String,
+      default: () => new UUID(),
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+    message_image_url: {
+      type: String,
+      required: false,
+    },
   },
-  post_id: {
-    type: String,
-    default: () => new UUID(),
+  {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      currentTime: () => Math.floor(Date.now() / 1000),
+    },
   },
-  title: {
-    type: String,
-    required: true,
-  },
-  message: {
-    type: String,
-    required: true,
-  },
-  message_image_url: {
-    type: String,
-    required: false,
+);
+
+postSchema.virtual('');
+
+postSchema.set('toJSON', {
+  transform: function (_, ret) {
+    ret.created_at = ret.created_at.getTime();
+    ret.updated_at = ret.updated_at.getTime();
   },
 });
 
-const Post = mongoose.model.Post || mongoose.model('Post', postModel);
+const Post =
+  mongoose.models.Post || mongoose.model('Post', postSchema);
 
 export default Post;

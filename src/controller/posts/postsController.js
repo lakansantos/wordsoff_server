@@ -6,13 +6,13 @@ const addPost = async (req, res) => {
   const { title, message } = req.body;
 
   try {
-    const newPost = await new Post({
+    const newPost = new Post({
       user_id,
       title,
       message,
     });
 
-    newPost.save();
+    await newPost.save();
 
     return res.status(201).json({
       message: 'Added post successfully',
@@ -25,4 +25,38 @@ const addPost = async (req, res) => {
   }
 };
 
-export { addPost };
+const getPosts = async (req, res) => {
+  try {
+    const { search, limit = 5, offset = 0 } = req.query;
+
+    const regexPattern = new RegExp(search, 'i');
+
+    const skipIndex = offset * limit;
+
+    const query = search ? { title: { $regex: regexPattern } } : {};
+    const totalRows = await Post.countDocuments(query);
+    const totalPages = Math.ceil(totalRows / limit);
+    const posts = await Post.find(query, { _id: 0 })
+      .skip(skipIndex)
+      .limit(parseInt(limit))
+      .sort({
+        created_at: 'desc',
+      });
+
+    return res.status(200).json({
+      data: posts,
+      meta: {
+        totalRows,
+        limit,
+        totalPages,
+        offset,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { addPost, getPosts };
