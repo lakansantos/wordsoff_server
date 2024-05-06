@@ -19,10 +19,10 @@ const getUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { userName, firstName, lastName, password } = req.body;
+    const { user_name, first_name, last_name, password } = req.body;
 
     const isUserNameExist = await User.findOne({
-      userName: userName.trim(),
+      user_name: user_name.trim(),
     });
 
     if (isUserNameExist)
@@ -37,9 +37,9 @@ const registerUser = async (req, res) => {
     );
 
     const newUser = new User({
-      userName: userName.trim(), // userName should be trimmed so that it can be unique and removes whitespaces.
-      firstName: firstName,
-      lastName: lastName,
+      user_name: user_name.trim(), // user_name should be trimmed so that it can be unique and removes whitespaces.
+      first_name: first_name,
+      last_name: last_name,
       password: hashedSaltedPassword,
     });
 
@@ -47,7 +47,14 @@ const registerUser = async (req, res) => {
 
     return res
       .status(201)
-      .json({ message: 'User created successfully', user: newUser });
+      .json({
+        message: 'User created successfully',
+        user: {
+          userName: newUser.user_name,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+        },
+      });
   } catch (error) {
     console.log(error);
     return res.status(500).json({

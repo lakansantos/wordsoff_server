@@ -1,3 +1,4 @@
+import { UUID } from 'mongodb';
 import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema({
@@ -13,6 +14,10 @@ const commentSchema = new mongoose.Schema({
     type: String,
     ref: 'Post',
     match: 'post_id',
+  },
+  comment_id: {
+    type: String,
+    default: () => new UUID(),
   },
 });
 

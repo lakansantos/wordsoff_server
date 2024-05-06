@@ -1,16 +1,17 @@
 import mongoose from 'mongoose';
 import { UUID } from 'mongodb';
+
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
+    first_name: {
       type: String,
       required: true,
     },
-    lastName: {
+    last_name: {
       type: String,
       required: true,
     },
-    userName: {
+    user_name: {
       type: String,
       required: true,
     },
