@@ -1,6 +1,7 @@
 import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
+import { validationErrorMessageMapper } from '../../utils/string.js';
 
 const addPost = async (req, res) => {
   const user_id = req.user_id;
@@ -23,6 +24,11 @@ const addPost = async (req, res) => {
       data: newPost,
     });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: validationErrorMessageMapper(error),
+      });
+    }
     return res.status(500).json({
       message: SERVER_ERROR_MESSAGE,
     });

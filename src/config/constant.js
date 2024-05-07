@@ -1,3 +1,3 @@
-const SERVER_ERROR_MESSAGE = 'Server Error';
+const SERVER_ERROR_MESSAGE = 'Internal Server Error';
 
 export { SERVER_ERROR_MESSAGE };

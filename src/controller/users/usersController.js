@@ -1,8 +1,10 @@
 import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
+import { validationErrorMessageMapper } from '../../utils/string.js';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
+
 const getUsers = async (req, res) => {
   try {
     const usersData = await User.find({}, excludedFields).sort({
@@ -12,7 +14,7 @@ const getUsers = async (req, res) => {
     return res.status(200).json(usersData);
   } catch (error) {
     return res.status(500).json({
-      message: 'Server error',
+      message: SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -25,6 +27,11 @@ const registerUser = async (req, res) => {
       user_name: user_name.trim(),
     });
 
+    if (!password) {
+      return res
+        .status(400)
+        .json({ message: 'Password field is missing' });
+    }
     if (isUserNameExist)
       return res.status(400).json({
         message: 'Username is already taken.',
@@ -55,8 +62,13 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: validationErrorMessageMapper(error),
+      });
+    }
     return res.status(500).json({
-      message: 'Something went wrong!',
+      message: SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -79,7 +91,6 @@ const viewUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: SERVER_ERROR_MESSAGE,
     });
