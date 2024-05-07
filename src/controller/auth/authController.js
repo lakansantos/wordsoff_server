@@ -52,4 +52,70 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { loginUser };
+const changeUserLoginPassword = async (req, res) => {
+  try {
+    const user_id = req.user_id;
+
+    const user = await User.findOne({ user_id });
+    const { currentPassword, newPassword, confirmPassword } =
+      req.body;
+
+    const missingFields = [];
+
+    [('currentPassword', 'newPassword', 'confirmPassword')].map(
+      (field) => {
+        if (!req.body[field]) {
+          missingFields.push(field);
+        }
+      },
+    );
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: `Missing fields: ${missingFields.join(
+          ', ',
+        )} required`,
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isPasswordMatch) {
+      return res.status(400).json({
+        message: 'Password is incorrect',
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        message: 'New password is equal to current password',
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        message: 'New and confirm password do not match',
+      });
+    }
+
+    const saltRound = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRound);
+
+    await User.findOneAndUpdate(
+      { user_id },
+      {
+        password: hashedPassword,
+      },
+    );
+    res.status(200).json({
+      message: 'Password has been changed successfully.',
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { loginUser, changeUserLoginPassword };
