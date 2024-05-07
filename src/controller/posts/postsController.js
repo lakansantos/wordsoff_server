@@ -8,11 +8,18 @@ const addPost = async (req, res) => {
   const { title, message } = req.body;
 
   try {
-    const user = await User.findOne({ user_id });
+    const author = await User.findOne({ user_id }).select(
+      '-password',
+    );
+
+    if (!author) {
+      return res.status(400).json({
+        message: 'No Author Found',
+      });
+    }
 
     const newPost = new Post({
-      user_id,
-      user_name: user.user_name,
+      author,
       title,
       message,
     });
@@ -49,6 +56,7 @@ const getPosts = async (req, res) => {
     const posts = await Post.find(query, { _id: 0 })
       .skip(skipIndex)
       .limit(parseInt(limit))
+      .populate({ path: 'author', select: { password: 0 } })
       .sort({
         created_at: 'desc',
       });
