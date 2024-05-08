@@ -7,11 +7,31 @@ const excludedFields = { password: 0, _id: 0, __v: 0 };
 
 const getUsers = async (req, res) => {
   try {
-    const usersData = await User.find({}, excludedFields).sort({
-      created_at: 'desc',
-    });
+    const { limit = 5, offset = 0, search } = req.query;
 
-    return res.status(200).json(usersData);
+    const regexSearch = new RegExp(search, 'i');
+    const query = search
+      ? { user_name: { $regex: regexSearch } }
+      : {};
+
+    const totalRows = await User.countDocuments(query);
+
+    const skipIndex = offset * limit;
+    const usersData = await User.find(query, excludedFields)
+      .sort({
+        created_at: 'desc',
+      })
+      .skip(skipIndex)
+      .limit(limit);
+
+    return res.status(200).json({
+      data: usersData,
+      meta: {
+        totalRows,
+        limit,
+        offset,
+      },
+    });
   } catch (error) {
     return res.status(500).json({
       message: SERVER_ERROR_MESSAGE,

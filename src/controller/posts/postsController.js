@@ -50,8 +50,16 @@ const getPosts = async (req, res) => {
 
     const skipIndex = offset * limit;
 
-    const query = search ? { title: { $regex: regexPattern } } : {};
+    const query = search
+      ? {
+          $or: [
+            { title: { $regex: regexPattern } },
+            { message: { $regex: regexPattern } },
+          ],
+        }
+      : {};
     const totalRows = await Post.countDocuments(query);
+
     const totalPages = Math.ceil(totalRows / limit);
     const posts = await Post.find(query, { _id: 0 })
       .skip(skipIndex)
