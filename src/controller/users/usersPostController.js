@@ -18,10 +18,12 @@ const getUserPost = async (req, res) => {
         message: 'User not found.',
       });
 
-    const userPost = await Post.find({ author: user._id }).populate({
-      path: 'author',
-      select: { password: 0 },
-    });
+    const userPost = await Post.find({ author: user._id })
+      .sort({ created_at: 'desc' })
+      .populate({
+        path: 'author',
+        select: { password: 0 },
+      });
     if (!userPost) {
       return res.status(400).json({
         message: "User's posts not found",

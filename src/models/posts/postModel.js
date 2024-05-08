@@ -42,6 +42,7 @@ postSchema.set('toJSON', {
   },
 });
 
+postSchema.index({ message: 'text', title: 'text' });
 const Post =
   mongoose.models.Post || mongoose.model('Post', postSchema);
 

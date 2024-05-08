@@ -45,6 +45,9 @@ userSchema.set('toJSON', {
     ret.updated_at = ret.updated_at.getTime();
   },
 });
+
+userSchema.index({ user_name: 'text' });
 const User =
   mongoose.models.User || mongoose.model('User', userSchema);
+
 export default User;
