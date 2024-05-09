@@ -14,8 +14,8 @@ const getUsers = async (req, res) => {
       ? { user_name: { $regex: regexSearch } }
       : {};
 
-    const totalRows = await User.countDocuments(query);
-
+    const total_rows = await User.countDocuments(query);
+    const total_pages = Math.ceil(total_rows / limit);
     const skipIndex = offset * limit;
     const usersData = await User.find(query, excludedFields)
       .sort({
@@ -27,7 +27,8 @@ const getUsers = async (req, res) => {
     return res.status(200).json({
       data: usersData,
       meta: {
-        totalRows,
+        total_rows,
+        total_pages,
         limit,
         offset,
       },

@@ -58,9 +58,9 @@ const getPosts = async (req, res) => {
           ],
         }
       : {};
-    const totalRows = await Post.countDocuments(query);
+    const total_rows = await Post.countDocuments(query);
 
-    const totalPages = Math.ceil(totalRows / limit);
+    const total_pages = Math.ceil(total_rows / limit);
     const posts = await Post.find(query, { _id: 0 })
       .skip(skipIndex)
       .limit(parseInt(limit))
@@ -72,9 +72,9 @@ const getPosts = async (req, res) => {
     return res.status(200).json({
       data: posts,
       meta: {
-        totalRows,
+        total_rows,
         limit,
-        totalPages,
+        total_pages,
         offset,
       },
     });
