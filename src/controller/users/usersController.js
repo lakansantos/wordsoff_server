@@ -37,6 +37,7 @@ const getUsers = async (req, res) => {
             },
             { $skip: offset * _limit },
             { $limit: _limit },
+            { $project: { password: 0, _id: 0, __v: 0 } },
           ],
         },
       },

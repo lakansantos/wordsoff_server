@@ -61,7 +61,13 @@ const getUserPost = async (req, res) => {
             {
               $project: {
                 'author_info.password': 0,
+                'author_info._id': 0,
+                'author_info.created_at': 0,
+                'author_info.updated_at': 0,
+                'author_info.__v': 0,
                 author: 0,
+                _id: 0,
+                __v: 0,
               },
             },
           ],

@@ -19,10 +19,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    comments: {
-      type: Array,
-      required: false,
-    },
     user_id: {
       type: String,
       default: () => new UUID(),
