@@ -48,8 +48,6 @@ const getPosts = async (req, res) => {
 
     const regexPattern = new RegExp(search, 'i');
 
-    const skipIndex = offset * limit;
-
     const query = search
       ? {
           $or: [
@@ -58,34 +56,99 @@ const getPosts = async (req, res) => {
           ],
         }
       : {};
-    const total_rows = await Post.countDocuments(query);
 
-    const total_pages = Math.ceil(total_rows / limit);
-    const posts = await Post.find(query, { _id: 0 })
-      .skip(skipIndex)
-      .limit(parseInt(limit))
-      .populate({ path: 'author', select: { password: 0 } })
-      .sort({
-        created_at: 'desc',
-      });
+    const response = await Post.aggregate([
+      { $match: query },
+      {
+        $facet: {
+          meta: [
+            { $count: 'total_rows' },
+            {
+              $addFields: {
+                total_pages: {
+                  $ceil: {
+                    $divide: ['$total_rows', parseInt(limit)],
+                  },
+                },
+                limit: parseInt(limit),
+                offset: parseInt(offset),
+              },
+            },
+          ],
+          data: [
+            { $skip: offset * limit },
+            { $sort: { created_at: -1 } },
+            { $limit: parseInt(limit) },
 
-    return res.status(200).json({
-      data: posts,
-      meta: {
-        total_rows,
-        limit,
-        total_pages,
-        offset,
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'author',
+                foreignField: '_id',
+                as: 'author_info',
+              },
+            },
+            {
+              $project: {
+                'author_info.password': 0,
+                author: 0,
+              },
+            },
+          ],
+        },
       },
+    ]);
+
+    const [{ meta, data = [] }] = response;
+    return res.status(200).json({
+      data,
+      meta: meta[0] || {},
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message: {
         SERVER_ERROR_MESSAGE,
-        error,
       },
     });
   }
 };
 
 export { addPost, getPosts };
+
+// {
+//   $facet: {
+//     metadata: [
+//       { $count: 'total_rows' },
+//       {
+//         $addFields: {
+//           total_pages: {
+//             $ceil: { $divide: ['$total_rows', limit] },
+//           },
+//           limit: limit,
+//           offset: offset,
+//         },
+//       },
+//     ],
+//     data: [
+//       { $sort: { created_at: -1 } },
+//       { $skip: offset * limit },
+//       { $limit: limit },
+
+//       {
+//         $lookup: {
+//           from: 'users',
+//           localField: 'author', // Field from the User collection
+//           foreignField: '_id',
+//           as: 'author_info',
+//         },
+//       },
+//       {
+//         $project: {
+//           author: 0,
+//           'author_info.password': 0,
+//         },
+//       },
+//     ],
+//   },
+// },
