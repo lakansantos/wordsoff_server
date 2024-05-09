@@ -14,24 +14,38 @@ const getUsers = async (req, res) => {
       ? { user_name: { $regex: regexSearch } }
       : {};
 
-    const total_rows = await User.countDocuments(query);
-    const total_pages = Math.ceil(total_rows / limit);
-    const skipIndex = offset * limit;
-    const usersData = await User.find(query, excludedFields)
-      .sort({
-        created_at: 'desc',
-      })
-      .skip(skipIndex)
-      .limit(limit);
-
-    return res.status(200).json({
-      data: usersData,
-      meta: {
-        total_rows,
-        total_pages,
-        limit,
-        offset,
+    const _limit = parseInt(limit);
+    const response = await User.aggregate([
+      { $match: query },
+      {
+        $facet: {
+          meta: [
+            { $count: 'total_rows' },
+            {
+              $addFields: {
+                total_pages: {
+                  $ceil: { $divide: ['$total_rows', _limit] },
+                },
+                limit: _limit,
+                offset: parseInt(offset),
+              },
+            },
+          ],
+          data: [
+            {
+              $sort: { created_at: -1 },
+            },
+            { $skip: offset * _limit },
+            { $limit: _limit },
+          ],
+        },
       },
+    ]);
+
+    const [{ data = [], meta }] = response;
+    return res.status(200).json({
+      data,
+      meta: meta[0] || {},
     });
   } catch (error) {
     return res.status(500).json({
