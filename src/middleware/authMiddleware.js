@@ -24,8 +24,12 @@ const authMiddleware = async (req, res, next) => {
         return res.status(400).json({
           message: 'No Token Found. Please relogin.',
         });
+
       return res.status(401).json({
-        message: 'Unauthorized',
+        message: {
+          text: 'Unauthorized',
+          error: error,
+        },
       });
     }
   } else {

@@ -113,7 +113,10 @@ const changeUserLoginPassword = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: SERVER_ERROR_MESSAGE,
+      message: {
+        SERVER_ERROR_MESSAGE,
+        error,
+      },
     });
   }
 };

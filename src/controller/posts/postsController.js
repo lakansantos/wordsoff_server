@@ -80,7 +80,10 @@ const getPosts = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: SERVER_ERROR_MESSAGE,
+      message: {
+        SERVER_ERROR_MESSAGE,
+        error,
+      },
     });
   }
 };

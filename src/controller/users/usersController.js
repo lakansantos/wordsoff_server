@@ -35,7 +35,7 @@ const getUsers = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: SERVER_ERROR_MESSAGE,
+      message: { SERVER_ERROR_MESSAGE, error },
     });
   }
 };
@@ -113,7 +113,10 @@ const viewUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: SERVER_ERROR_MESSAGE,
+      message: {
+        error,
+        SERVER_ERROR_MESSAGE,
+      },
     });
   }
 };
