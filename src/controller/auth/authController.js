@@ -10,6 +10,9 @@ const convertToToken = (data) => {
 };
 
 const loginUser = async (req, res) => {
+  const date = new Date(req.rateLimit.resetTime);
+  req.rateLimit.resetTime = date.toLocaleTimeString();
+
   try {
     const { user_name, password } = req.body;
 
