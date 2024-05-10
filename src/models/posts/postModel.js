@@ -25,22 +25,9 @@ const postSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-      currentTime: () => Math.floor(Date.now() / 1000),
-    },
+    timestamps: true,
   },
 );
-
-postSchema.virtual('');
-
-postSchema.set('toJSON', {
-  transform: function (_, ret) {
-    ret.created_at = ret.created_at.getTime();
-    ret.updated_at = ret.updated_at.getTime();
-  },
-});
 
 postSchema.index({ message: 'text', title: 'text' });
 const Post =
