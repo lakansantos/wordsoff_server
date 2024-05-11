@@ -21,7 +21,10 @@ const loginUser = async (req, res) => {
         message: 'Password field is required',
       });
     }
-    const user = await User.findOne({ user_name });
+    const user = await User.findOneAndUpdate({
+      user_name,
+      last_logged_in: new Date(),
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -41,6 +44,7 @@ const loginUser = async (req, res) => {
 
     return res.status(201).json({
       user_id: user.user_id,
+      last_logged_in: user.last_logged_in,
       token: convertToToken({ user_id: user.user_id }),
     });
   } catch (error) {

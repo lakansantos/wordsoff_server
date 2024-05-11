@@ -57,7 +57,7 @@ const getUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { user_name, first_name, last_name, password } = req.body;
+    const { user_name, gender, about, password } = req.body;
 
     const isUserNameExist = await User.findOne({
       user_name: user_name.trim(),
@@ -81,9 +81,9 @@ const registerUser = async (req, res) => {
 
     const newUser = new User({
       user_name: user_name.trim(), // user_name should be trimmed so that it can be unique and removes whitespaces.
-      first_name: first_name,
-      last_name: last_name,
+      gender: gender,
       password: hashedSaltedPassword,
+      about: about,
     });
 
     await newUser.save();
@@ -92,9 +92,9 @@ const registerUser = async (req, res) => {
       message: 'User created successfully',
       user: {
         user_name: newUser.user_name,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
+        gender: newUser.gender,
         user_id: newUser.user_id,
+        about: newUser.about,
       },
     });
   } catch (error) {

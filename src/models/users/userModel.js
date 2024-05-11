@@ -3,15 +3,11 @@ import { UUID } from 'mongodb';
 
 const userSchema = new mongoose.Schema(
   {
-    first_name: {
-      type: String,
-      required: true,
-    },
-    last_name: {
-      type: String,
-      required: true,
-    },
     user_name: {
+      type: String,
+      required: true,
+    },
+    gender: {
       type: String,
       required: true,
     },
@@ -22,6 +18,12 @@ const userSchema = new mongoose.Schema(
     user_id: {
       type: String,
       default: () => new UUID(),
+    },
+    last_logged_in: {
+      type: Date,
+    },
+    about: {
+      type: String,
     },
   },
   {
