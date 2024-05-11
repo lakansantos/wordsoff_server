@@ -11,6 +11,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: () => new UUID(),
     },
+    genre: [String],
     title: {
       type: String,
       required: true,

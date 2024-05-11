@@ -5,7 +5,7 @@ import { validationErrorMessageMapper } from '../../utils/string.js';
 
 const addPost = async (req, res) => {
   const user_id = req.user_id;
-  const { title, message } = req.body;
+  const { title, message, genre } = req.body;
 
   try {
     const author = await User.findOne({ user_id }).select(
@@ -22,6 +22,7 @@ const addPost = async (req, res) => {
       author,
       title,
       message,
+      genre,
     });
 
     await newPost.save();
