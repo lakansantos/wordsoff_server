@@ -57,6 +57,7 @@ const getPosts = async (req, res) => {
         }
       : {};
 
+    const _limit = parseInt(limit);
     const response = await Post.aggregate([
       { $match: query },
       {
@@ -67,18 +68,18 @@ const getPosts = async (req, res) => {
               $addFields: {
                 total_pages: {
                   $ceil: {
-                    $divide: ['$total_rows', parseInt(limit)],
+                    $divide: ['$total_rows', _limit],
                   },
                 },
-                limit: parseInt(limit),
+                limit: _limit,
                 offset: parseInt(offset),
               },
             },
           ],
           data: [
-            { $skip: offset * limit },
+            { $skip: offset * _limit },
             { $sort: { created_at: -1 } },
-            { $limit: parseInt(limit) },
+            { $limit: _limit },
 
             {
               $lookup: {
@@ -95,6 +96,7 @@ const getPosts = async (req, res) => {
                 'author_info.created_at': 0,
                 'author_info.updated_at': 0,
                 'author_info.__v': 0,
+                'author_info.last_logged_in': 0,
                 author: 0,
                 _id: 0,
                 __v: 0,
