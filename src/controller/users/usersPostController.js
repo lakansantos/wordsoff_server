@@ -98,4 +98,50 @@ const getUserPost = async (req, res) => {
   }
 };
 
-export { getUserPost };
+/**
+ * Requirements for this one
+ * Logged in user should not be able to delete other users' post
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const deletePostPermanently = async (req, res) => {
+  try {
+    const { userId, postId } = req.params;
+    const userIdFromParams = userId;
+    const userIdLoggedIn = req.user_id;
+
+    const loggedInUser = await User.findOne({
+      user_id: userIdLoggedIn,
+    }).select({ password: 0 });
+
+    if (userIdFromParams !== loggedInUser.user_id) {
+      return res.status(401).json({
+        message: 'Unauthorized to delete a post',
+      });
+    }
+
+    const selectedDeletePost = await Post.findOneAndDelete({
+      post_id: postId,
+      author: loggedInUser._id,
+    });
+
+    if (!selectedDeletePost) {
+      return res.status(400).json({
+        message: 'Selected post is not available',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Deleted the post successfully',
+      deletedPost: selectedDeletePost,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { getUserPost, deletePostPermanently };

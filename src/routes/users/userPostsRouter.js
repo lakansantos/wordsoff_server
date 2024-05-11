@@ -1,8 +1,17 @@
 import express from 'express';
-import { getUserPost } from '../../controller/users/usersPostController.js';
+import {
+  deletePostPermanently,
+  getUserPost,
+} from '../../controller/users/usersPostController.js';
+import authMiddleware from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/user/:userId/posts', getUserPost);
+router.delete(
+  '/user/:userId/post/:postId',
+  authMiddleware,
+  deletePostPermanently,
+);
 
 export default router;
