@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    follower_count: {
+      type: Number,
+    },
+    following_count: {
+      type: Number,
+    },
     user_id: {
       type: String,
       default: () => new UUID(),
