@@ -7,7 +7,11 @@ import authMiddleware from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/user/follow/:targetUserId', authMiddleware, followUser);
-router.get('/user/follow/:targetUserId', getUserFollowers);
+router.post(
+  '/user/follower/:targetUserId',
+  authMiddleware,
+  followUser,
+);
+router.get('/user/followers/:targetUserId', getUserFollowers);
 
 export default router;

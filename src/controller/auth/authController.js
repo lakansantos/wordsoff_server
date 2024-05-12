@@ -46,7 +46,7 @@ const loginUser = async (req, res) => {
     return res.status(201).json({
       user_id: user.user_id,
       last_logged_in: user.last_logged_in,
-      token: convertToToken({ user_id: user.user_id }),
+      token: convertToToken({ token_id: user._id }),
     });
   } catch (error) {
     if (error.name === 'ValidationError') {
@@ -62,9 +62,9 @@ const loginUser = async (req, res) => {
 
 const changeUserLoginPassword = async (req, res) => {
   try {
-    const user_id = req.user_id;
+    const token_id = req.token_id;
 
-    const user = await User.findOne({ user_id });
+    const user = await User.findOne({ _id: token_id });
     const { currentPassword, newPassword, confirmPassword } =
       req.body;
 
@@ -111,7 +111,7 @@ const changeUserLoginPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, saltRound);
 
     await User.findOneAndUpdate(
-      { user_id },
+      { _id: token_id },
       {
         password: hashedPassword,
       },

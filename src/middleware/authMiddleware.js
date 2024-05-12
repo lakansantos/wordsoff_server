@@ -14,8 +14,7 @@ const authMiddleware = async (req, res, next) => {
           });
         }
 
-        const user_id = decodedToken.user_id;
-        req.user_id = user_id;
+        req.token_id = decodedToken.token_id;
 
         next();
       });

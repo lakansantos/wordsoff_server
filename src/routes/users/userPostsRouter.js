@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.get('/user/:userId/posts', getUserPost);
 router.delete(
-  '/user/:userId/post/:postId',
+  '/user/post/:postId',
   authMiddleware,
   deletePostPermanently,
 );

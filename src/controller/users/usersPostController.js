@@ -75,18 +75,6 @@ const getUserPost = async (req, res) => {
       },
     ]);
 
-    // const userPost = await Post.find({ author: user._id })
-    //   .sort({ created_at: 'desc' })
-    //   .populate({
-    //     path: 'author',
-    //     select: { password: 0 },
-    //   });
-    // if (!userPost) {
-    //   return res.status(400).json({
-    //     message: "User's posts not found",
-    //   });
-    // }
-
     return res.status(200).json({
       data,
       meta,
@@ -101,29 +89,19 @@ const getUserPost = async (req, res) => {
 /**
  * Requirements for this one
  * Logged in user should not be able to delete other users' post
+ * Logged in user can only delete their own post
  * @param {*} req
  * @param {*} res
  * @returns
  */
 const deletePostPermanently = async (req, res) => {
   try {
-    const { userId, postId } = req.params;
-    const userIdFromParams = userId;
-    const userIdLoggedIn = req.user_id;
-
-    const loggedInUser = await User.findOne({
-      user_id: userIdLoggedIn,
-    }).select({ password: 0 });
-
-    if (userIdFromParams !== loggedInUser.user_id) {
-      return res.status(401).json({
-        message: 'Unauthorized to delete a post',
-      });
-    }
+    const { postId } = req.params;
+    const userLoggedInTokenId = req.token_id;
 
     const selectedDeletePost = await Post.findOneAndDelete({
       post_id: postId,
-      author: loggedInUser._id,
+      author: userLoggedInTokenId,
     });
 
     if (!selectedDeletePost) {

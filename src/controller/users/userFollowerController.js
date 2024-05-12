@@ -6,10 +6,10 @@ const followUser = async (req, res) => {
   try {
     const { targetUserId } = req.params;
 
-    const user_id = req.user_id;
+    const loggedInUserTokenId = req.token_id;
 
     const loggedInUser = await User.findOne({
-      user_id,
+      _id: loggedInUserTokenId,
     });
 
     const targetUser = await User.findOne({
@@ -33,7 +33,7 @@ const followUser = async (req, res) => {
       });
     }
 
-    if (targetUserId === user_id) {
+    if (targetUserId === loggedInUser.user_id) {
       return res.status(400).json({
         message: 'You cannot follow yourself!',
       });

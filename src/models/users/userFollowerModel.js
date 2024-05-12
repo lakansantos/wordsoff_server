@@ -13,7 +13,7 @@ const followerSchema = new mongoose.Schema(
   },
   {
     timestamps: {
-      createdAt: 'followed_on',
+      createdAt: 'date_followed',
       updatedAt: false,
     },
   },

@@ -4,11 +4,11 @@ import User from '../../models/users/userModel.js';
 import { validationErrorMessageMapper } from '../../utils/string.js';
 
 const addPost = async (req, res) => {
-  const user_id = req.user_id;
+  const token_id = req.token_id;
   const { title, message, genre } = req.body;
 
   try {
-    const author = await User.findOne({ user_id }).select(
+    const author = await User.findOne({ _id: token_id }).select(
       '-password',
     );
 
