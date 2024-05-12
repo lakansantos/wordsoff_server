@@ -8,10 +8,12 @@ const followUser = async (req, res) => {
 
     const loggedInUserTokenId = req.token_id;
 
-    const loggedInUser = await User.findOne({
+    // get the logged in user id
+    const loggedInUser = await User.findById({
       _id: loggedInUserTokenId,
     });
 
+    // get the target user to follow
     const targetUser = await User.findOne({
       user_id: targetUserId,
     });
@@ -22,7 +24,8 @@ const followUser = async (req, res) => {
       });
     }
 
-    const isFollowedUser = await Follower.findOne({
+    // check also if the logged in user followed the other user already
+    const isFollowedUser = await Follower.exists({
       follower: loggedInUser._id,
       followed_user_id: targetUserId,
     });
@@ -42,9 +45,31 @@ const followUser = async (req, res) => {
     const newFollower = new Follower({
       follower: loggedInUser._id,
       followed_user_id: targetUserId,
+      followed_user_name: targetUser.user_name,
     });
 
     await newFollower.save();
+
+    // this is used to get the total followers count of the followed user then append it to their data.
+    const followerCount = await Follower.countDocuments({
+      followed_user_id: targetUserId,
+    });
+
+    await User.findOneAndUpdate(
+      { user_id: targetUserId },
+      {
+        followers_count: followerCount,
+      },
+    );
+
+    // this is used to get the total following count of the logged in user then append it to their data.
+    const followingCount = await Follower.countDocuments({
+      follower: loggedInUserTokenId,
+    });
+
+    await User.findByIdAndUpdate(loggedInUser, {
+      following_count: followingCount,
+    });
 
     return res.status(200).json({
       message: 'Followed user successfully',
@@ -75,10 +100,14 @@ const getUserFollowers = async (req, res) => {
 
     const targetUser = await Follower.find({
       followed_user_id: user.user_id,
-    }).populate({
-      path: 'follower',
-      select: { password: 0 },
-    });
+    })
+      .populate({
+        path: 'follower',
+        select: { password: 0 },
+      })
+      .sort({
+        date_followed: 'desc',
+      });
 
     return res.status(200).json({
       data: targetUser,
@@ -91,4 +120,30 @@ const getUserFollowers = async (req, res) => {
   }
 };
 
-export { followUser, getUserFollowers };
+const getUserFollowing = async (req, res) => {
+  try {
+    const { targetUserId } = req.params;
+
+    // just to get the ._id
+    const user = await User.findOne({
+      user_id: targetUserId,
+    });
+
+    const usersFollowing = await Follower.find(
+      {
+        follower: user._id,
+      },
+      { follower: 0 },
+    );
+
+    return res.status(200).json({
+      data: usersFollowing,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error,
+    });
+  }
+};
+
+export { followUser, getUserFollowers, getUserFollowing };

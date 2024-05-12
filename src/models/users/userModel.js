@@ -15,11 +15,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    follower_count: {
+    followers_count: {
       type: Number,
+      default: 0,
     },
     following_count: {
       type: Number,
+      default: 0,
     },
     user_id: {
       type: String,

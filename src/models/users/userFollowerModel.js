@@ -10,6 +10,10 @@ const followerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    followed_user_name: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: {
