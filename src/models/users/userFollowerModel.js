@@ -6,13 +6,9 @@ const followerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    followed_user_id: {
-      type: String,
-      required: true,
-    },
-    followed_user_name: {
-      type: String,
-      required: true,
+    followed_user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   {

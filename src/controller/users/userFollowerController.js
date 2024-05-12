@@ -27,7 +27,7 @@ const followUser = async (req, res) => {
     // check also if the logged in user followed the other user already
     const isFollowedUser = await Follower.exists({
       follower: loggedInUser._id,
-      followed_user_id: targetUserId,
+      followed_user: targetUser._id,
     });
 
     if (isFollowedUser) {
@@ -44,15 +44,14 @@ const followUser = async (req, res) => {
 
     const newFollower = new Follower({
       follower: loggedInUser._id,
-      followed_user_id: targetUserId,
-      followed_user_name: targetUser.user_name,
+      followed_user: targetUser._id,
     });
 
     await newFollower.save();
 
     // this is used to get the total followers count of the followed user then append it to their data.
     const followerCount = await Follower.countDocuments({
-      followed_user_id: targetUserId,
+      followed_user: targetUser._id,
     });
 
     await User.findOneAndUpdate(
@@ -99,7 +98,7 @@ const getUserFollowers = async (req, res) => {
     }
 
     const targetUser = await Follower.find({
-      followed_user_id: user.user_id,
+      followed_user: user._id,
     })
       .populate({
         path: 'follower',
@@ -133,8 +132,13 @@ const getUserFollowing = async (req, res) => {
       {
         follower: user._id,
       },
-      { follower: 0 },
-    );
+      { follower: 0, 'followed_user.password': 0 },
+    ).populate({
+      path: 'followed_user',
+      select: {
+        password: 0,
+      },
+    });
 
     return res.status(200).json({
       data: usersFollowing,
