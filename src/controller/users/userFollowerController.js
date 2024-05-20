@@ -95,18 +95,75 @@ const getUserFollowers = async (req, res) => {
       });
     }
 
-    const targetUser = await Follower.find({
-      followed_user: user._id,
-    })
-      .populate({
-        path: 'follower',
-      })
-      .sort({
-        date_followed: 'desc',
-      });
+    const { search, limit = 5, offset = 0 } = req.query;
+
+    const regexSearch = new RegExp(search, 'i');
+
+    const query = search
+      ? { follower_name: { $regex: regexSearch } }
+      : {};
+
+    const _limit = parseInt(limit);
+
+    const _offset = parseInt(offset);
+
+    const [{ meta = {}, data = [] }] = await Follower.aggregate([
+      {
+        $match: {
+          followed_user: user._id,
+        },
+      },
+      {
+        $facet: {
+          meta: [
+            { $count: 'total_rows' },
+            {
+              $addFields: {
+                total_pages: {
+                  $ceil: {
+                    $divide: ['$total_rows', _limit],
+                  },
+                },
+                limit: _limit,
+                offset: _offset,
+              },
+            },
+          ],
+          data: [
+            { $skip: _limit * _offset },
+            { $sort: { created_at: -1 } },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'follower',
+                foreignField: '_id',
+                as: 'follower',
+              },
+            },
+            {
+              $addFields: {
+                follower_name: '$follower.user_name',
+              },
+            },
+            { $unwind: '$follower_name' },
+            {
+              $match: {
+                ...query,
+              },
+            },
+            { $project: { 'follower.password': 0, _id: 0, __v: 0 } },
+            {
+              $unwind: '$follower',
+            },
+          ],
+        },
+      },
+    ]);
 
     return res.status(200).json({
-      data: targetUser,
+      data,
+      meta,
     });
   } catch (error) {
     console.error(error);

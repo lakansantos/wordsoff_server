@@ -19,6 +19,8 @@ const followerSchema = new mongoose.Schema(
   },
 );
 
+followerSchema.index({ follower_name: 'text' });
+
 const Follower =
   mongoose.models.Follower ||
   mongoose.model('Follower', followerSchema);
