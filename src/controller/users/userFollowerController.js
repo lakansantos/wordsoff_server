@@ -87,9 +87,7 @@ const getUserFollowers = async (req, res) => {
   try {
     const { targetUserId } = req.params;
 
-    const user = await User.findOne({ user_id: targetUserId }).select(
-      { password: 0 },
-    );
+    const user = await User.findOne({ user_id: targetUserId });
 
     if (!user) {
       return res.status(400).json({
@@ -102,7 +100,6 @@ const getUserFollowers = async (req, res) => {
     })
       .populate({
         path: 'follower',
-        select: { password: 0 },
       })
       .sort({
         date_followed: 'desc',
@@ -132,12 +129,9 @@ const getUserFollowing = async (req, res) => {
       {
         follower: user._id,
       },
-      { follower: 0, 'followed_user.password': 0 },
+      { follower: 0 },
     ).populate({
       path: 'followed_user',
-      select: {
-        password: 0,
-      },
     });
 
     return res.status(200).json({

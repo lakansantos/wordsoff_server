@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     followers_count: {
       type: Number,

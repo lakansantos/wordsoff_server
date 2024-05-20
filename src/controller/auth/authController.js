@@ -23,7 +23,7 @@ const loginUser = async (req, res) => {
     }
     const user = await User.findOne({
       user_name,
-    });
+    }).select('+password');
 
     if (!user) {
       return res.status(404).json({
@@ -64,7 +64,9 @@ const changeUserLoginPassword = async (req, res) => {
   try {
     const token_id = req.token_id;
 
-    const user = await User.findOne({ _id: token_id });
+    const user = await User.findOne({ _id: token_id }).select(
+      '+password',
+    );
     const { currentPassword, newPassword, confirmPassword } =
       req.body;
 

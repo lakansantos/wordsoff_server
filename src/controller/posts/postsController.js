@@ -8,9 +8,7 @@ const addPost = async (req, res) => {
   const { title, message, genre } = req.body;
 
   try {
-    const author = await User.findOne({ _id: token_id }).select(
-      '-password',
-    );
+    const author = await User.findOne({ _id: token_id });
 
     if (!author) {
       return res.status(400).json({
