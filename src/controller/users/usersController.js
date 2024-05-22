@@ -46,7 +46,12 @@ const getUsers = async (req, res) => {
     const [{ data = [], meta }] = response;
     return res.status(200).json({
       data,
-      meta: meta[0] || {},
+      meta: meta[0] || {
+        limit: limit,
+        offset: offset,
+        total_pages: 0,
+        total_rows: 0,
+      },
     });
   } catch (error) {
     return res.status(500).json({

@@ -26,8 +26,8 @@ const followUser = async (req, res) => {
 
     // check also if the logged in user followed the other user already
     const isFollowedUser = await Follower.exists({
-      follower: loggedInUser._id,
-      followed_user: targetUser._id,
+      follower_details: loggedInUser._id,
+      followed_user_details: targetUser._id,
     });
 
     if (isFollowedUser) {
@@ -43,15 +43,17 @@ const followUser = async (req, res) => {
     }
 
     const newFollower = new Follower({
-      follower: loggedInUser._id,
-      followed_user: targetUser._id,
+      follower_details: loggedInUser._id,
+      followed_user_details: targetUser._id,
+      follower_user_name: loggedInUser.user_name,
+      followed_user_name: targetUser.user_name,
     });
 
     await newFollower.save();
 
     // this is used to get the total followers count of the followed user then append it to their data.
     const followerCount = await Follower.countDocuments({
-      followed_user: targetUser._id,
+      followed_user_details: targetUser._id,
     });
 
     await User.findOneAndUpdate(
@@ -63,7 +65,7 @@ const followUser = async (req, res) => {
 
     // this is used to get the total following count of the logged in user then append it to their data.
     const followingCount = await Follower.countDocuments({
-      follower: loggedInUserTokenId,
+      follower_details: loggedInUserTokenId,
     });
 
     await User.findByIdAndUpdate(loggedInUser, {
@@ -100,17 +102,16 @@ const getUserFollowers = async (req, res) => {
     const regexSearch = new RegExp(search, 'i');
 
     const query = search
-      ? { follower_name: { $regex: regexSearch } }
+      ? { follower_user_name: { $regex: regexSearch } }
       : {};
 
     const _limit = parseInt(limit);
 
-    const _offset = parseInt(offset);
-
     const [{ meta = {}, data = [] }] = await Follower.aggregate([
       {
         $match: {
-          followed_user: user._id,
+          ...query,
+          followed_user_details: user._id,
         },
       },
       {
@@ -125,36 +126,31 @@ const getUserFollowers = async (req, res) => {
                   },
                 },
                 limit: _limit,
-                offset: _offset,
+                offset: offset,
               },
             },
           ],
           data: [
-            { $skip: _limit * _offset },
-            { $sort: { created_at: -1 } },
+            { $skip: _limit * offset },
+            { $sort: { date_followed: -1 } },
             { $limit: limit },
             {
               $lookup: {
                 from: 'users',
-                localField: 'follower',
+                localField: 'follower_details',
                 foreignField: '_id',
-                as: 'follower',
+                as: 'follower_details',
               },
             },
             {
-              $addFields: {
-                follower_name: '$follower.user_name',
+              $project: {
+                'follower_details.password': 0,
+                _id: 0,
+                __v: 0,
               },
             },
-            { $unwind: '$follower_name' },
             {
-              $match: {
-                ...query,
-              },
-            },
-            { $project: { 'follower.password': 0, _id: 0, __v: 0 } },
-            {
-              $unwind: '$follower',
+              $unwind: '$follower_details',
             },
           ],
         },
@@ -163,7 +159,12 @@ const getUserFollowers = async (req, res) => {
 
     return res.status(200).json({
       data,
-      meta,
+      meta: meta[0] || {
+        limit: limit,
+        offset: offset,
+        total_pages: 0,
+        total_rows: 0,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -182,17 +183,66 @@ const getUserFollowing = async (req, res) => {
       user_id: targetUserId,
     });
 
-    const usersFollowing = await Follower.find(
+    const { search, offset = 0, limit = 5 } = req.query;
+
+    const _limit = parseInt(limit);
+
+    const regexSearch = new RegExp(search, 'i');
+    const query = search
+      ? {
+          followed_user_name: { $regex: regexSearch },
+        }
+      : {};
+
+    const [{ data = [], meta }] = await Follower.aggregate([
       {
-        follower: user._id,
+        $match: {
+          ...query,
+          follower_details: user._id,
+        },
       },
-      { follower: 0 },
-    ).populate({
-      path: 'followed_user',
-    });
+      {
+        $facet: {
+          meta: [
+            { $count: 'total_rows' },
+            {
+              $addFields: {
+                limit: _limit,
+                offset: parseInt(offset),
+                total_pages: {
+                  $ceil: {
+                    $divide: ['$total_rows', _limit],
+                  },
+                },
+              },
+            },
+          ],
+          data: [
+            { $skip: parseInt(offset) * _limit },
+            { $sort: { date_followed: -1 } },
+            { $limit: _limit },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'followed_user_details',
+                foreignField: '_id',
+                as: 'followed_user_details',
+              },
+            },
+            {
+              $project: {
+                'followed_user_details.password': 0,
+                'followed_user_details.updated_at': 0,
+              },
+            },
+          ],
+        },
+      },
+    ]);
 
     return res.status(200).json({
-      data: usersFollowing,
+      data,
+      meta: meta[0] || {},
     });
   } catch (error) {
     return res.status(500).json({
