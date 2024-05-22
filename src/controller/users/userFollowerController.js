@@ -4,7 +4,7 @@ import User from '../../models/users/userModel.js';
 
 const followUser = async (req, res) => {
   try {
-    const { targetUserId } = req.params;
+    const { targetUserName } = req.params;
 
     const loggedInUserTokenId = req.token_id;
 
@@ -15,7 +15,7 @@ const followUser = async (req, res) => {
 
     // get the target user to follow
     const targetUser = await User.findOne({
-      user_id: targetUserId,
+      user_name: targetUserName,
     });
 
     if (!targetUser) {
@@ -36,7 +36,7 @@ const followUser = async (req, res) => {
       });
     }
 
-    if (targetUserId === loggedInUser.user_id) {
+    if (targetUserName === loggedInUser.user_name) {
       return res.status(400).json({
         message: 'You cannot follow yourself!',
       });
@@ -57,7 +57,7 @@ const followUser = async (req, res) => {
     });
 
     await User.findOneAndUpdate(
-      { user_id: targetUserId },
+      { user_name: targetUserName },
       {
         followers_count: followerCount,
       },
@@ -87,9 +87,9 @@ const followUser = async (req, res) => {
 
 const getUserFollowers = async (req, res) => {
   try {
-    const { targetUserId } = req.params;
+    const { targetUserName } = req.params;
 
-    const user = await User.findOne({ user_id: targetUserId });
+    const user = await User.findOne({ user_name: targetUserName });
 
     if (!user) {
       return res.status(400).json({
@@ -176,11 +176,11 @@ const getUserFollowers = async (req, res) => {
 
 const getUserFollowing = async (req, res) => {
   try {
-    const { targetUserId } = req.params;
+    const { targetUserName } = req.params;
 
     // just to get the ._id
     const user = await User.findOne({
-      user_id: targetUserId,
+      user_name: targetUserName,
     });
 
     const { search, offset = 0, limit = 5 } = req.query;

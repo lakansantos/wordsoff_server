@@ -3,7 +3,7 @@ import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
 
 const getUserPost = async (req, res) => {
-  const { userId } = req.params;
+  const { userName } = req.params;
 
   try {
     const { search, limit = 5, offset = 0 } = req.query;
@@ -18,7 +18,7 @@ const getUserPost = async (req, res) => {
         }
       : {};
 
-    const user = await User.findOne({ user_id: userId });
+    const user = await User.findOne({ user_name: userName });
 
     if (!user) {
       return res.status(404).json({

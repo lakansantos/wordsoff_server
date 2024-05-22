@@ -7,7 +7,7 @@ import authMiddleware from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/user/:userId/posts', getUserPost);
+router.get('/user/:userName/posts', getUserPost);
 router.delete(
   '/user/post/:postId',
   authMiddleware,

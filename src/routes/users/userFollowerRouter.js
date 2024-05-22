@@ -8,8 +8,12 @@ import authMiddleware from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/user/:targetUserId/follow', authMiddleware, followUser);
-router.get('/user/:targetUserId/followers', getUserFollowers);
-router.get('/user/:targetUserId/following', getUserFollowing);
+router.post(
+  '/user/:targetUserName/follow',
+  authMiddleware,
+  followUser,
+);
+router.get('/user/:targetUserName/followers', getUserFollowers);
+router.get('/user/:targetUserName/following', getUserFollowing);
 
 export default router;

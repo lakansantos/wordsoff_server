@@ -115,11 +115,11 @@ const registerUser = async (req, res) => {
 };
 
 const viewUser = async (req, res) => {
-  const { userId } = req.params;
+  const { userName } = req.params;
 
   try {
     const user = await User.findOne(
-      { user_id: userId },
+      { user_name: userName },
       excludedFields,
     );
 
