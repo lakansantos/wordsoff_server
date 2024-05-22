@@ -109,7 +109,12 @@ const getPosts = async (req, res) => {
     const [{ meta, data = [] }] = response;
     return res.status(200).json({
       data,
-      meta: meta[0] || {},
+      meta: meta[0] || {
+        limit: limit,
+        offset: offset,
+        total_pages: 0,
+        total_rows: 0,
+      },
     });
   } catch (error) {
     console.log(error);
