@@ -126,4 +126,27 @@ const getPosts = async (req, res) => {
   }
 };
 
-export { addPost, getPosts };
+const getPostById = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const post = await Post.findOne({
+      post_id: postId,
+    }).populate('author');
+
+    if (!post) {
+      return res.status(404).json({
+        message: 'Post is not available!',
+      });
+    }
+
+    return res.status(200).json({
+      data: post,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error,
+    });
+  }
+};
+
+export { addPost, getPosts, getPostById };
