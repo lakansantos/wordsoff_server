@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   deletePostPermanently,
+  editUserPost,
   getUserPost,
 } from '../../controller/users/usersPostController.js';
 import authMiddleware from '../../middleware/authMiddleware.js';
@@ -13,5 +14,7 @@ router.delete(
   authMiddleware,
   deletePostPermanently,
 );
+
+router.put('/user/post/:postId', authMiddleware, editUserPost);
 
 export default router;

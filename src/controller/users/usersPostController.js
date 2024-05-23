@@ -1,6 +1,7 @@
 import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
+import { validationErrorMessageMapper } from '../../utils/string.js';
 
 const getUserPost = async (req, res) => {
   const { userName } = req.params;
@@ -127,4 +128,54 @@ const deletePostPermanently = async (req, res) => {
   }
 };
 
-export { getUserPost, deletePostPermanently };
+const editUserPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const { genre, title, message } = req.body;
+    const token_id = req.token_id;
+
+    const author = await User.findOne({
+      _id: token_id,
+    });
+
+    if (!author) {
+      return res.status(400).json({
+        message: 'Not authorized',
+      });
+    }
+    const postToEdit = await Post.findOneAndUpdate(
+      {
+        post_id: postId,
+        author: author._id,
+      },
+      {
+        title,
+        message,
+        genre,
+      },
+      { new: true },
+    );
+
+    if (!postToEdit) {
+      return res.status(404).json({
+        message: 'Selected post is not available.',
+      });
+    }
+
+    return res.status(201).json({
+      message: postToEdit,
+    });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: validationErrorMessageMapper(error),
+      });
+    }
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { getUserPost, deletePostPermanently, editUserPost };
