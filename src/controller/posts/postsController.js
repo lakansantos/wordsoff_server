@@ -57,6 +57,7 @@ const getPosts = async (req, res) => {
       : {};
 
     const _limit = parseInt(limit);
+    const _offset = parseInt(offset);
     const response = await Post.aggregate([
       { $match: query },
       {
@@ -71,13 +72,13 @@ const getPosts = async (req, res) => {
                   },
                 },
                 limit: _limit,
-                offset: parseInt(offset),
+                offset: _offset,
               },
             },
           ],
           data: [
-            { $skip: offset * _limit },
             { $sort: { created_at: -1 } },
+            { $skip: _offset * _limit },
             { $limit: _limit },
 
             {
@@ -111,7 +112,7 @@ const getPosts = async (req, res) => {
       data,
       meta: meta[0] || {
         limit: limit,
-        offset: offset,
+        offset: _offset,
         total_pages: 0,
         total_rows: 0,
       },
