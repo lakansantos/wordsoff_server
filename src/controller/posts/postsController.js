@@ -8,7 +8,7 @@ const addPost = async (req, res) => {
   const { title, message, genre } = req.body;
 
   try {
-    const author = await User.findOne({ _id: token_id });
+    const author = await User.findById({ _id: token_id });
 
     if (!author) {
       return res.status(400).json({
@@ -24,6 +24,17 @@ const addPost = async (req, res) => {
     });
 
     await newPost.save();
+
+    const postsCount = await Post.countDocuments({
+      author: author._id,
+    });
+
+    await User.findOneAndUpdate(
+      { _id: author._id },
+      {
+        posts_count: postsCount,
+      },
+    );
 
     return res.status(201).json({
       message: 'Added post successfully',

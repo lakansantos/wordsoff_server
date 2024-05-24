@@ -33,11 +33,31 @@ const getUsers = async (req, res) => {
           ],
           data: [
             {
-              $sort: { created_at: -1 },
+              $lookup: {
+                from: 'posts',
+                foreignField: 'author',
+                localField: '_id',
+                as: 'posts',
+              },
+            },
+            {
+              $addFields: {
+                posts_count: { $size: '$posts' },
+              },
+            },
+            {
+              $sort: { posts_count: -1 },
             },
             { $skip: offset * _limit },
             { $limit: _limit },
-            { $project: { password: 0, _id: 0, __v: 0 } },
+            {
+              $project: {
+                password: 0,
+                _id: 0,
+                __v: 0,
+                posts: 0,
+              },
+            },
           ],
         },
       },

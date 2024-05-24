@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    posts_count: {
+      type: Number,
+      default: 0,
+    },
     following_count: {
       type: Number,
       default: 0,
