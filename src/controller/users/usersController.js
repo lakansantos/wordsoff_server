@@ -43,6 +43,9 @@ const getUsers = async (req, res) => {
             {
               $addFields: {
                 posts_count: { $size: '$posts' },
+                last_logged_in: {
+                  $ifNull: ['$last_logged_in', null],
+                },
               },
             },
             {

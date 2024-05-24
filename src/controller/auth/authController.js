@@ -41,7 +41,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    user.last_logged_in = new Date();
+    await User.findOneAndUpdate(
+      { user_name },
+      { last_logged_in: new Date() },
+    );
 
     return res.status(201).json({
       user_id: user.user_id,
