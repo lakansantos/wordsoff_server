@@ -85,7 +85,8 @@ const getUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { user_name, gender, about, password } = req.body;
+    const { user_name, gender, about, birth_date, password } =
+      req.body;
 
     const isUserNameExist = await User.findOne({
       user_name: user_name.trim(),
@@ -112,6 +113,7 @@ const registerUser = async (req, res) => {
       gender: gender,
       password: hashedSaltedPassword,
       about: about,
+      birth_date: birth_date,
     });
 
     await newUser.save();

@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    birth_date: {
+      type: Date,
+      required: true,
+    },
     followers_count: {
       type: Number,
       default: 0,
