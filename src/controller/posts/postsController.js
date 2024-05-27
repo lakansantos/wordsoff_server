@@ -2,10 +2,11 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
 import { validationErrorMessageMapper } from '../../utils/string.js';
+import { uploadImage } from '../../utils/uploads.js';
 
 const addPost = async (req, res) => {
   const token_id = req.token_id;
-  const { title, message, genre } = req.body;
+  const { title, message, genre, uploaded_image_path } = req.body;
 
   try {
     const author = await User.findById({ _id: token_id });
@@ -16,11 +17,22 @@ const addPost = async (req, res) => {
       });
     }
 
+    let image_path = !uploaded_image_path && undefined;
+
+    if (uploaded_image_path) {
+      const { url } = await uploadImage(uploaded_image_path, {
+        width: 500,
+        height: 500,
+      });
+      image_path = url;
+    }
+
     const newPost = new Post({
       author,
       title,
       message,
       genre,
+      image_path,
     });
 
     await newPost.save();
