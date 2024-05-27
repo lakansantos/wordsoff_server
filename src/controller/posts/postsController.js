@@ -20,10 +20,7 @@ const addPost = async (req, res) => {
     let image_path = !uploaded_image_path && undefined;
 
     if (uploaded_image_path) {
-      const { url } = await uploadImage(uploaded_image_path, {
-        width: 500,
-        height: 500,
-      });
+      const { url } = await uploadImage(uploaded_image_path);
       image_path = url;
     }
 
