@@ -41,14 +41,14 @@ const loginUser = async (req, res) => {
       });
     }
 
-    await User.findOneAndUpdate(
+    const selectedUser = await User.findOneAndUpdate(
       { user_name },
       { last_logged_in: new Date() },
     );
 
     return res.status(201).json({
-      user_id: user.user_id,
-      last_logged_in: user.last_logged_in,
+      user_id: selectedUser.user_id,
+      last_logged_in: selectedUser.last_logged_in,
       token: convertToToken({ token_id: user._id }),
     });
   } catch (error) {

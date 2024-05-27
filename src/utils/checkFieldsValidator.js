@@ -1,15 +1,22 @@
 const checkFieldsValidator = (missingFields, req) => {
   const fields = [];
-  fields.map((field) => {
+
+  let hasMissingFields;
+  missingFields.map((field) => {
     if (!req.body[field]) {
-      missingFields.push(field);
+      fields.push(field);
     }
   });
-  if (missingFields.length > 0) {
-    return true;
+  if (fields.length > 0) {
+    hasMissingFields = true;
   } else {
-    return false;
+    hasMissingFields = false;
   }
+
+  return {
+    fields,
+    hasMissingFields,
+  };
 };
 
 export default checkFieldsValidator;
