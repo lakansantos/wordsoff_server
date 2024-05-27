@@ -222,20 +222,18 @@ const editUserDetails = async (req, res) => {
   try {
     const { gender, birth_date, about } = req.body;
 
-    const submittedFields = { gender, birth_date, about };
+    const requiredFields = { gender, birth_date };
 
-    const fieldsKey = Object.keys(submittedFields);
+    const fieldsKey = Object.keys(requiredFields);
 
-    const { hasMissingFields, fields } = checkFieldValidator(
+    const { hasMissingFields, errorMessage } = checkFieldValidator(
       fieldsKey,
       req,
     );
 
     if (hasMissingFields) {
       return res.status(400).json({
-        message: `Required field is missing: ${fields
-          .filter(Boolean)
-          .join(', ')}`,
+        message: errorMessage,
       });
     }
     const selectedUser = await User.findByIdAndUpdate(
