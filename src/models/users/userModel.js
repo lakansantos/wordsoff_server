@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    profile_image: {
+      type: String,
+    },
+    cover_photo_image: {
+      type: String,
+    },
     followers_count: {
       type: Number,
       default: 0,

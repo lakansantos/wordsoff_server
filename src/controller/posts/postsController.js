@@ -55,6 +55,13 @@ const addPost = async (req, res) => {
         message: validationErrorMessageMapper(error),
       });
     }
+
+    // for image file upload error handling
+    if (error.message === 'ENOENT') {
+      return res.status(500).json({
+        message: 'Selected file path do not exist',
+      });
+    }
     return res.status(500).json({
       message: SERVER_ERROR_MESSAGE,
     });

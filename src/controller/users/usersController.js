@@ -2,6 +2,7 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
 import { validationErrorMessageMapper } from '../../utils/string.js';
+import { uploadImage } from '../../utils/uploads.js';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
 
@@ -85,10 +86,17 @@ const getUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { user_name, gender, about, birth_date, password } =
-      req.body;
+    const {
+      user_name,
+      gender,
+      uploaded_cover_photo_image,
+      uploaded_profile_image,
+      about,
+      birth_date,
+      password,
+    } = req.body;
 
-    const regexUserNameFormat = /^[a-zA-Z0-9]+$/;
+    const regexUserNameFormat = /^[a-zA-Z0-9_]+$/;
     const trimmedUserName = user_name ? user_name.trim() : undefined;
 
     const isValidFormat = regexUserNameFormat.test(trimmedUserName);
@@ -118,12 +126,34 @@ const registerUser = async (req, res) => {
       saltRound,
     );
 
+    let profile_image;
+    let cover_photo_image;
+
+    if (uploaded_profile_image) {
+      const { url } = await uploadImage(uploaded_profile_image, {
+        width: 500,
+        height: 500,
+      });
+
+      profile_image = url;
+    }
+
+    if (uploaded_cover_photo_image) {
+      const { url } = await uploadImage(uploaded_cover_photo_image, {
+        width: 1000,
+        height: 700,
+      });
+      cover_photo_image = url;
+    }
+
     const newUser = new User({
       user_name: trimmedUserName, // user_name should be trimmed so that it can be unique and removes whitespaces.
       gender: gender,
       password: hashedSaltedPassword,
       about: about,
       birth_date: birth_date,
+      profile_image,
+      cover_photo_image,
     });
 
     await newUser.save();
@@ -135,12 +165,22 @@ const registerUser = async (req, res) => {
         gender: newUser.gender,
         user_id: newUser.user_id,
         about: newUser.about,
+        birth_date: newUser.birth_date,
+        profile_image: newUser.profile_image,
+        cover_photo_image: newUser.cover_photo_image,
       },
     });
   } catch (error) {
     if (error.name === 'ValidationError') {
       return res.status(400).json({
         message: validationErrorMessageMapper(error),
+      });
+    }
+
+    // for image file upload error handling
+    if (error.message === 'ENOENT') {
+      return res.status(500).json({
+        message: 'Selected file path do not exist',
       });
     }
     return res.status(500).json({
