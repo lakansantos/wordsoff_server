@@ -49,7 +49,7 @@ const getUsers = async (req, res) => {
               },
             },
             {
-              $sort: { posts_count: -1 },
+              $sort: { created_at: -1 },
             },
             { $skip: offset * _limit },
             { $limit: _limit },
@@ -88,8 +88,18 @@ const registerUser = async (req, res) => {
     const { user_name, gender, about, birth_date, password } =
       req.body;
 
+    const regexUserNameFormat = /^[a-zA-Z0-9]+$/;
+    const trimmedUserName = user_name ? user_name.trim() : undefined;
+
+    const isValidFormat = regexUserNameFormat.test(trimmedUserName);
+
+    if (!isValidFormat)
+      return res.status(400).json({
+        message:
+          'Invalid username Format. Should contain only 1 word and no special characters.',
+      });
     const isUserNameExist = await User.findOne({
-      user_name: user_name.trim(),
+      user_name: trimmedUserName,
     });
 
     if (!password) {
@@ -109,7 +119,7 @@ const registerUser = async (req, res) => {
     );
 
     const newUser = new User({
-      user_name: user_name.trim(), // user_name should be trimmed so that it can be unique and removes whitespaces.
+      user_name: trimmedUserName, // user_name should be trimmed so that it can be unique and removes whitespaces.
       gender: gender,
       password: hashedSaltedPassword,
       about: about,
