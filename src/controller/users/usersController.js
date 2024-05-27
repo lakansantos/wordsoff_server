@@ -3,6 +3,7 @@ import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
 import { validationErrorMessageMapper } from '../../utils/string.js';
 import { uploadImage } from '../../utils/uploads.js';
+import checkFieldValidator from '../../utils/checkFieldsValidator.js';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
 
@@ -216,4 +217,61 @@ const viewUser = async (req, res) => {
   }
 };
 
-export { getUsers, registerUser, viewUser };
+const editUserDetails = async (req, res) => {
+  const token_id = req.token_id;
+  try {
+    const { gender, birth_date, about } = req.body;
+
+    const submittedFields = { gender, birth_date, about };
+
+    const fieldsKey = Object.keys(submittedFields);
+
+    const { hasMissingFields, fields } = checkFieldValidator(
+      fieldsKey,
+      req,
+    );
+
+    if (hasMissingFields) {
+      return res.status(400).json({
+        message: `Required field is missing: ${fields
+          .filter(Boolean)
+          .join(', ')}`,
+      });
+    }
+    const selectedUser = await User.findByIdAndUpdate(
+      {
+        _id: token_id,
+      },
+      {
+        gender,
+        birth_date,
+        about,
+      },
+      { new: true, runValidators: true },
+    );
+
+    if (!selectedUser) {
+      return res.status(400).json({
+        message: 'User is not available',
+      });
+    }
+
+    return res.status(200).json({
+      data: selectedUser,
+    });
+  } catch (error) {
+    console.log(error);
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: validationErrorMessageMapper(error),
+      });
+    }
+
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+export { getUsers, registerUser, viewUser, editUserDetails };

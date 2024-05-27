@@ -5,20 +5,27 @@ const userSchema = new mongoose.Schema(
   {
     user_name: {
       type: String,
-      required: true,
+      required: [true, 'User name is required'],
     },
     gender: {
       type: String,
-      required: true,
+      required: [true, 'Gender is required'],
+      enum: ['male', 'female', 'other'],
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Password is required'],
       select: false,
     },
     birth_date: {
       type: Date,
       required: true,
+      validate: {
+        validator: function (value) {
+          return value < new Date();
+        },
+        message: 'Birth date must be in the past.',
+      },
     },
     profile_image: {
       type: String,
