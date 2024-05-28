@@ -4,7 +4,7 @@ import User from '../../models/users/userModel.js';
 import { validationErrorMessageMapper } from '../../utils/string.js';
 import { deleteImage, uploadImage } from '../../utils/uploads.js';
 
-const getUserPost = async (req, res) => {
+const getPostsByUserName = async (req, res) => {
   const { userName } = req.params;
 
   try {
@@ -101,6 +101,94 @@ const getUserPost = async (req, res) => {
  * @param {*} res
  * @returns
  */
+
+const getPostsByLoggedInUser = async (req, res) => {
+  const token_id = req.token_id;
+  try {
+    const { search, limit = 5, offset = 0 } = req.query;
+
+    const regexPattern = new RegExp(search, 'i');
+    const query = search
+      ? {
+          $or: [
+            { title: { $regex: regexPattern } },
+            { message: { $regex: regexPattern } },
+          ],
+        }
+      : {};
+
+    const user = await User.findById(token_id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    const _limit = parseInt(limit);
+
+    const [{ data = [], meta = {} }] = await Post.aggregate([
+      { $match: { ...query, author: user._id } },
+      {
+        $facet: {
+          meta: [
+            { $count: 'total_rows' },
+            {
+              $addFields: {
+                limit: _limit,
+                offset: parseInt(offset),
+                total_pages: {
+                  $ceil: {
+                    $divide: ['$total_rows', _limit],
+                  },
+                },
+              },
+            },
+          ],
+          data: [
+            { $sort: { created_at: -1 } },
+            { $skip: offset * limit },
+            { $limit: _limit },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'author',
+                foreignField: '_id',
+                as: 'author_info',
+              },
+            },
+            {
+              $project: {
+                'author_info.password': 0,
+                'author_info._id': 0,
+                'author_info.created_at': 0,
+                'author_info.updated_at': 0,
+                'author_info.__v': 0,
+                author: 0,
+                _id: 0,
+                __v: 0,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      data,
+      meta: meta[0] || {
+        limit: limit,
+        offset: offset,
+        total_pages: 0,
+        total_rows: 0,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: { SERVER_ERROR_MESSAGE, error },
+    });
+  }
+};
 const deletePostPermanently = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -213,4 +301,9 @@ const editUserPost = async (req, res) => {
   }
 };
 
-export { getUserPost, deletePostPermanently, editUserPost };
+export {
+  getPostsByUserName,
+  getPostsByLoggedInUser,
+  deletePostPermanently,
+  editUserPost,
+};

@@ -2,13 +2,15 @@ import express from 'express';
 import {
   deletePostPermanently,
   editUserPost,
-  getUserPost,
+  getPostsByLoggedInUser,
+  getPostsByUserName,
 } from '../../controller/users/usersPostController.js';
 import authMiddleware from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/user/:userName/posts', getUserPost);
+router.get('/user/:userName/posts', getPostsByUserName);
+router.get('/my-posts', authMiddleware, getPostsByLoggedInUser);
 router.delete(
   '/user/post/:postId',
   authMiddleware,
