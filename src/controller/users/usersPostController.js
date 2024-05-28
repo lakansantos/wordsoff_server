@@ -117,6 +117,9 @@ const deletePostPermanently = async (req, res) => {
       });
     }
 
+    if (selectedDeletePost.image_file.public_id) {
+      await deleteImage(selectedDeletePost.image_file.public_id);
+    }
     return res.status(200).json({
       message: 'Deleted the post successfully',
       deletedPost: selectedDeletePost,
