@@ -100,6 +100,12 @@ const registerUser = async (req, res) => {
     const regexUserNameFormat = /^[a-zA-Z0-9_]+$/;
     const trimmedUserName = user_name ? user_name.trim() : undefined;
 
+    if (trimmedUserName.length < 3) {
+      return res.status(400).json({
+        message:
+          'User name character length must be at least 3 characters long',
+      });
+    }
     const isValidFormat = regexUserNameFormat.test(trimmedUserName);
 
     if (!isValidFormat)
@@ -127,6 +133,14 @@ const registerUser = async (req, res) => {
       saltRound,
     );
 
+    const epochBirthDate = Date.parse(birth_date);
+
+    if (epochBirthDate > Date.now()) {
+      return res.status(400).json({
+        message: 'Birth date must be in the past.',
+      });
+    }
+
     let profile_image = null;
     let cover_photo_image = null;
 
@@ -135,7 +149,6 @@ const registerUser = async (req, res) => {
         width: 500,
         height: 500,
       });
-
       profile_image = url;
     }
 
@@ -177,7 +190,6 @@ const registerUser = async (req, res) => {
         message: validationErrorMessageMapper(error),
       });
     }
-
     // for image file upload error handling
     if (error.message === 'ENOENT') {
       return res.status(500).json({
