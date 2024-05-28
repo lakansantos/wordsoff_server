@@ -151,6 +151,9 @@ const editUserPost = async (req, res) => {
     if (uploaded_image_path) {
       const { url, public_id } = await uploadImage(
         uploaded_image_path,
+        {
+          folder: 'posts',
+        },
       );
       image_file = {
         path: url,

@@ -5,7 +5,7 @@ import {
   API_CLOUDINARY_SECRET,
 } from '../config/environment.js';
 
-const uploadImage = async (imagePath, transformation) => {
+const uploadImage = async (imagePath, options) => {
   try {
     // Configuration
     cloudinary.config({
@@ -15,9 +15,10 @@ const uploadImage = async (imagePath, transformation) => {
     });
 
     // Upload an image
-    const uploadResult = await cloudinary.uploader.upload(imagePath, {
-      transformation: transformation,
-    });
+    const uploadResult = await cloudinary.uploader.upload(
+      imagePath,
+      options,
+    );
 
     const { public_id } = uploadResult || {};
 

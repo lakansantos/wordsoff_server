@@ -220,8 +220,11 @@ const uploadProfileImage = async (req, res) => {
       const { url, public_id } = await uploadImage(
         uploaded_profile_image,
         {
-          width: 500,
-          height: 500,
+          transformation: {
+            width: 500,
+            height: 500,
+          },
+          folder: 'profile_images',
         },
       );
       profile_image = {
@@ -274,6 +277,7 @@ const uploadCoverPhotoImage = async (req, res) => {
     if (uploaded_cover_photo_image) {
       const { url, public_id } = await uploadImage(
         uploaded_cover_photo_image,
+        { folder: 'cover_photos' },
       );
       cover_photo_image = {
         path: url,
