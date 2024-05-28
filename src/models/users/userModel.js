@@ -22,10 +22,20 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     profile_image: {
-      type: String,
+      path: {
+        type: String,
+      },
+      public_id: {
+        type: String,
+      },
     },
     cover_photo_image: {
-      type: String,
+      path: {
+        type: String,
+      },
+      public_id: {
+        type: String,
+      },
     },
     followers_count: {
       type: Number,

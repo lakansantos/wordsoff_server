@@ -2,7 +2,7 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
 import { validationErrorMessageMapper } from '../../utils/string.js';
-import { uploadImage } from '../../utils/uploads.js';
+import { deleteImage, uploadImage } from '../../utils/uploads.js';
 import checkFieldValidator from '../../utils/checkFieldsValidator.js';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
@@ -87,15 +87,8 @@ const getUsers = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const {
-      user_name,
-      gender,
-      uploaded_cover_photo_image,
-      uploaded_profile_image,
-      about,
-      birth_date,
-      password,
-    } = req.body;
+    const { user_name, gender, about, birth_date, password } =
+      req.body;
 
     const regexUserNameFormat = /^[a-zA-Z0-9_]+$/;
     const trimmedUserName = user_name ? user_name.trim() : undefined;
@@ -141,33 +134,12 @@ const registerUser = async (req, res) => {
       });
     }
 
-    let profile_image = null;
-    let cover_photo_image = null;
-
-    if (uploaded_profile_image) {
-      const { url } = await uploadImage(uploaded_profile_image, {
-        width: 500,
-        height: 500,
-      });
-      profile_image = url;
-    }
-
-    if (uploaded_cover_photo_image) {
-      const { url } = await uploadImage(uploaded_cover_photo_image, {
-        width: 1000,
-        height: 700,
-      });
-      cover_photo_image = url;
-    }
-
     const newUser = new User({
       user_name: trimmedUserName, // user_name should be trimmed so that it can be unique and removes whitespaces.
       gender: gender,
       password: hashedSaltedPassword,
       about: about,
       birth_date: birth_date,
-      profile_image,
-      cover_photo_image,
     });
 
     await newUser.save();
@@ -229,6 +201,60 @@ const viewUser = async (req, res) => {
   }
 };
 
+const uploadProfileImage = async (req, res) => {
+  const token_id = req.token_id;
+
+  try {
+    const { uploaded_profile_image } = req.body;
+    let profile_image = null;
+
+    const thisUser = await User.findById(token_id);
+
+    if (!thisUser) {
+      return res.status(400).json({
+        message: "Selected user's profile is not available.",
+      });
+    }
+
+    if (uploaded_profile_image) {
+      const { url, public_id } = await uploadImage(
+        uploaded_profile_image,
+        {
+          width: 500,
+          height: 500,
+        },
+      );
+      profile_image = {
+        path: url,
+        public_id,
+      };
+    }
+
+    // delete the image in the cloudinary whenever the user re-uploaded a photo
+    if (thisUser.profile_image.public_id) {
+      await deleteImage(thisUser.profile_image.public_id);
+    }
+
+    thisUser.profile_image = profile_image;
+
+    await thisUser.save();
+
+    return res.status(201).json({
+      data: thisUser,
+    });
+  } catch (error) {
+    // for image file upload error handling
+    if (error.message === 'ENOENT') {
+      return res.status(500).json({
+        message: 'Selected file path do not exist',
+      });
+    }
+
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
 const editUserDetails = async (req, res) => {
   const token_id = req.token_id;
   try {
@@ -284,4 +310,10 @@ const editUserDetails = async (req, res) => {
   }
 };
 
-export { getUsers, registerUser, viewUser, editUserDetails };
+export {
+  getUsers,
+  registerUser,
+  viewUser,
+  editUserDetails,
+  uploadProfileImage,
+};
