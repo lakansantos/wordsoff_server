@@ -3,6 +3,7 @@ import {
   followUser,
   getUserFollowers,
   getUserFollowing,
+  unfollowUser,
 } from '../../controller/users/userFollowerController.js';
 import authMiddleware from '../../middleware/authMiddleware.js';
 
@@ -15,5 +16,10 @@ router.post(
 );
 router.get('/user/:targetUserName/followers', getUserFollowers);
 router.get('/user/:targetUserName/following', getUserFollowing);
+router.delete(
+  '/user/:targetUserName/unfollow',
+  authMiddleware,
+  unfollowUser,
+);
 
 export default router;

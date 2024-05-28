@@ -85,6 +85,71 @@ const followUser = async (req, res) => {
   }
 };
 
+const unfollowUser = async (req, res) => {
+  const token_id = req.token_id;
+
+  try {
+    const { targetUserName } = req.params;
+    const thisUser = await User.findById(token_id);
+    const userToUnfollow = await User.findOne({
+      user_name: targetUserName,
+    });
+
+    console.log(token_id);
+    if (!thisUser) {
+      return res.status(400).json({
+        message:
+          'You are currently not available to perform this action. Please try again later.',
+      });
+    }
+    // check also if the logged in user followed the other user already
+    const isFollowedUser = await Follower.exists({
+      follower_details: thisUser._id,
+      followed_user_details: userToUnfollow._id,
+    });
+
+    if (!isFollowedUser) {
+      return res.status(400).json({
+        message:
+          "You cannot unfollow someone you haven't followed yet.",
+      });
+    }
+
+    await Follower.findOneAndDelete({
+      followed_user_details: userToUnfollow._id,
+      follower_details: thisUser._id,
+    });
+
+    // this is used to get the total following count of the logged in user then append it to their data.
+    const followingCount = await Follower.countDocuments({
+      follower_details: thisUser._id,
+    });
+
+    // this is used to get the total followers count of the followed user then append it to their data.
+    const followerCount = await Follower.countDocuments({
+      followed_user_details: userToUnfollow._id,
+    });
+
+    await User.findByIdAndUpdate(thisUser, {
+      following_count: followingCount,
+    });
+
+    await User.findByIdAndUpdate(userToUnfollow, {
+      followers_count: followerCount,
+    });
+
+    return res.status(200).json({
+      message: 'Unfollowed successfully',
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
 const getUserFollowers = async (req, res) => {
   try {
     const { targetUserName } = req.params;
@@ -256,4 +321,9 @@ const getUserFollowing = async (req, res) => {
   }
 };
 
-export { followUser, getUserFollowers, getUserFollowing };
+export {
+  followUser,
+  getUserFollowers,
+  getUserFollowing,
+  unfollowUser,
+};
