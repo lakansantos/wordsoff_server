@@ -127,8 +127,8 @@ const registerUser = async (req, res) => {
       saltRound,
     );
 
-    let profile_image;
-    let cover_photo_image;
+    let profile_image = null;
+    let cover_photo_image = null;
 
     if (uploaded_profile_image) {
       const { url } = await uploadImage(uploaded_profile_image, {

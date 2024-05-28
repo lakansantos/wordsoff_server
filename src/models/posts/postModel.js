@@ -20,9 +20,13 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    image_path: {
-      type: String,
-      required: false,
+    image_file: {
+      path: {
+        type: String,
+      },
+      public_id: {
+        type: String,
+      },
     },
   },
   {

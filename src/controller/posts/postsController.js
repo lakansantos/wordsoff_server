@@ -17,11 +17,16 @@ const addPost = async (req, res) => {
       });
     }
 
-    let image_path = !uploaded_image_path && undefined;
+    let image_file = null;
 
     if (uploaded_image_path) {
-      const { url } = await uploadImage(uploaded_image_path);
-      image_path = url;
+      const { url, public_id } = await uploadImage(
+        uploaded_image_path,
+      );
+      image_file = {
+        public_id,
+        path: url,
+      };
     }
 
     const newPost = new Post({
@@ -29,7 +34,7 @@ const addPost = async (req, res) => {
       title,
       message,
       genre,
-      image_path,
+      image_file,
     });
 
     await newPost.save();

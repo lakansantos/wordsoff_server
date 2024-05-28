@@ -2,6 +2,7 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
 import { validationErrorMessageMapper } from '../../utils/string.js';
+import { deleteImage, uploadImage } from '../../utils/uploads.js';
 
 const getUserPost = async (req, res) => {
   const { userName } = req.params;
@@ -132,7 +133,7 @@ const editUserPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    const { genre, title, message } = req.body;
+    const { genre, title, message, uploaded_image_path } = req.body;
     const token_id = req.token_id;
 
     const author = await User.findOne({
@@ -144,24 +145,45 @@ const editUserPost = async (req, res) => {
         message: 'Not authorized',
       });
     }
-    const postToEdit = await Post.findOneAndUpdate(
-      {
-        post_id: postId,
-        author: author._id,
-      },
-      {
-        title,
-        message,
-        genre,
-      },
-      { new: true },
-    );
+
+    let image_file = null;
+
+    if (uploaded_image_path) {
+      const { url, public_id } = await uploadImage(
+        uploaded_image_path,
+      );
+      image_file = {
+        path: url,
+        public_id,
+      };
+    }
+    const postToEdit = await Post.findOne({
+      post_id: postId,
+      author: author._id,
+    });
+
+    // delete the image in the cloudinary whenever the user edited the photo
+    if (
+      (uploaded_image_path === null || uploaded_image_path) &&
+      postToEdit.image_file.public_id
+    ) {
+      await deleteImage(postToEdit.image_file.public_id);
+    }
 
     if (!postToEdit) {
       return res.status(404).json({
         message: 'Selected post is not available.',
       });
     }
+
+    // Update the post with new details
+    postToEdit.title = title;
+    postToEdit.message = message;
+    postToEdit.genre = genre;
+    postToEdit.image_file = image_file;
+
+    // Save the updated post
+    await postToEdit.save();
 
     return res.status(201).json({
       message: postToEdit,
@@ -170,6 +192,13 @@ const editUserPost = async (req, res) => {
     if (error.name === 'ValidationError') {
       return res.status(400).json({
         message: validationErrorMessageMapper(error),
+      });
+    }
+
+    // for image file upload error handling
+    if (error.message === 'ENOENT') {
+      return res.status(500).json({
+        message: 'Selected file path do not exist',
       });
     }
     return res.status(500).json({

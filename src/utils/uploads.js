@@ -35,5 +35,19 @@ const uploadImage = async (imagePath, transformation) => {
     throw new Error(e.error.code);
   }
 };
+const deleteImage = async (public_id) => {
+  try {
+    // Configuration
+    cloudinary.config({
+      cloud_name: API_CLOUD_NAME,
+      api_key: API_CLOUDINARY_KEY,
+      api_secret: API_CLOUDINARY_SECRET, // Click 'View Credentials' below to copy your API secret
+    });
 
-export { uploadImage };
+    await cloudinary.uploader.destroy(public_id);
+  } catch (e) {
+    throw new Error(e);
+  }
+};
+
+export { uploadImage, deleteImage };
