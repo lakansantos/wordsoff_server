@@ -95,13 +95,19 @@ const unfollowUser = async (req, res) => {
       user_name: targetUserName,
     });
 
-    console.log(token_id);
     if (!thisUser) {
       return res.status(400).json({
         message:
           'You are currently not available to perform this action. Please try again later.',
       });
     }
+
+    if (thisUser.user_id === userToUnfollow.user_id) {
+      return res.status(400).json({
+        message: 'You cannot unfollow yourself',
+      });
+    }
+
     // check also if the logged in user followed the other user already
     const isFollowedUser = await Follower.exists({
       follower_details: thisUser._id,
