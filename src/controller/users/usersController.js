@@ -255,6 +255,58 @@ const uploadProfileImage = async (req, res) => {
     });
   }
 };
+
+const uploadCoverPhotoImage = async (req, res) => {
+  const token_id = req.token_id;
+
+  try {
+    const { uploaded_cover_photo_image } = req.body;
+
+    const thisUser = await User.findById(token_id);
+
+    if (!thisUser) {
+      return res.status(400).json({
+        message: "Selected user's profile is not available.",
+      });
+    }
+
+    let cover_photo_image = null;
+    if (uploaded_cover_photo_image) {
+      const { url, public_id } = await uploadImage(
+        uploaded_cover_photo_image,
+      );
+      cover_photo_image = {
+        path: url,
+        public_id,
+      };
+    }
+
+    // delete the image in the cloudinary whenever the user re-uploaded a photo
+    if (thisUser.cover_photo_image.public_id) {
+      await deleteImage(thisUser.cover_photo_image.public_id);
+    }
+
+    thisUser.cover_photo_image = cover_photo_image;
+
+    await thisUser.save();
+
+    return res.status(201).json({
+      data: thisUser,
+    });
+  } catch (error) {
+    // for image file upload error handling
+    if (error.message === 'ENOENT') {
+      return res.status(500).json({
+        message: 'Selected file path do not exist',
+      });
+    }
+
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
 const editUserDetails = async (req, res) => {
   const token_id = req.token_id;
   try {
@@ -316,4 +368,5 @@ export {
   viewUser,
   editUserDetails,
   uploadProfileImage,
+  uploadCoverPhotoImage,
 };
