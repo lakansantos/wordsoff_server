@@ -162,18 +162,18 @@ const editUserPost = async (req, res) => {
       author: author._id,
     });
 
+    if (!postToEdit) {
+      return res.status(404).json({
+        message: 'Selected post is not available.',
+      });
+    }
+
     // delete the image in the cloudinary whenever the user edited the photo
     if (
       (uploaded_image_path === null || uploaded_image_path) &&
       postToEdit.image_file.public_id
     ) {
       await deleteImage(postToEdit.image_file.public_id);
-    }
-
-    if (!postToEdit) {
-      return res.status(404).json({
-        message: 'Selected post is not available.',
-      });
     }
 
     // Update the post with new details
