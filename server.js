@@ -8,6 +8,7 @@ import postRouter from './src/routes/posts/postsRoutes.js';
 import userPostsRouter from './src/routes/users/userPostsRouter.js';
 import userFollowerRouter from './src/routes/users/userFollowerRouter.js';
 import { API_VERSION_URL } from './src/config/environment.js';
+import cors from 'cors';
 
 async function server() {
   dotenv.config();
@@ -20,6 +21,11 @@ async function server() {
     res.send('yehey');
   });
 
+  app.use(
+    cors({
+      origin: '*',
+    }),
+  );
   app.use(API_VERSION_URL, usersRouter);
   app.use(API_VERSION_URL, authRouter);
   app.use(API_VERSION_URL, postRouter);
