@@ -33,7 +33,7 @@ const uploadImage = async (imagePath, options) => {
       url,
     };
   } catch (e) {
-    throw new Error(e.error.code);
+    throw new Error(e);
   }
 };
 const deleteImage = async (public_id) => {

@@ -7,7 +7,9 @@ import authRouter from './src/routes/auth/authRoutes.js';
 import postRouter from './src/routes/posts/postsRoutes.js';
 import userPostsRouter from './src/routes/users/userPostsRouter.js';
 import userFollowerRouter from './src/routes/users/userFollowerRouter.js';
+import fileImageRouter from './src/routes/files/filesImageRoute.js';
 import { API_VERSION_URL } from './src/config/environment.js';
+import cors from 'cors';
 
 async function server() {
   dotenv.config();
@@ -20,11 +22,17 @@ async function server() {
     res.send('yehey');
   });
 
+  app.use(
+    cors({
+      origin: '*',
+    }),
+  );
   app.use(API_VERSION_URL, usersRouter);
   app.use(API_VERSION_URL, authRouter);
   app.use(API_VERSION_URL, postRouter);
   app.use(API_VERSION_URL, userPostsRouter);
   app.use(API_VERSION_URL, userFollowerRouter);
+  app.use(API_VERSION_URL, fileImageRouter);
   const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`Listening to Port: ${port}`);
