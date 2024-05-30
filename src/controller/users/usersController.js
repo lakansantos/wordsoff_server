@@ -217,10 +217,16 @@ const uploadProfileImage = async (req, res) => {
 
     let image_file = null;
     if (image) {
-      image_file = {
-        path: image.path,
-        public_id: image.public_id,
-      };
+      if (image.public_id && image.path) {
+        image_file = {
+          path: image.path,
+          public_id: image.public_id,
+        };
+      } else {
+        return res.status(400).json({
+          message: 'Both public_id and path are required.',
+        });
+      }
     }
 
     // delete the image in the cloudinary whenever the user re-uploaded a photo
@@ -265,10 +271,16 @@ const uploadCoverPhotoImage = async (req, res) => {
 
     let cover_photo_image = null;
     if (image) {
-      cover_photo_image = {
-        path: image.path,
-        public_id: image.public_id,
-      };
+      if (image.public_id && image.path) {
+        cover_photo_image = {
+          path: image.path,
+          public_id: image.public_id,
+        };
+      } else {
+        return res.status(400).json({
+          message: 'Both public_id and path are required.',
+        });
+      }
     }
 
     // delete the image in the cloudinary whenever the user re-uploaded a photo

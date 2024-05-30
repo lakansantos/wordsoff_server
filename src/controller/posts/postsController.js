@@ -18,11 +18,18 @@ const addPost = async (req, res) => {
 
     let image_file = null;
 
-    if (image)
-      image_file = {
-        path: image.path,
-        public_id: image.public_id,
-      };
+    if (image) {
+      if (image.public_id && image.path) {
+        image_file = {
+          path: image.path,
+          public_id: image.public_id,
+        };
+      } else {
+        return res.status(400).json({
+          message: 'Both public_id and path are required.',
+        });
+      }
+    }
 
     const newPost = new Post({
       author,
