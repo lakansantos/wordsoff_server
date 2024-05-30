@@ -11,11 +11,23 @@ import fileImageRouter from './src/routes/files/filesImageRoute.js';
 import { API_VERSION_URL } from './src/config/environment.js';
 import cors from 'cors';
 
+import { Server } from 'socket.io';
+import http from 'http';
 async function server() {
   dotenv.config();
 
   db();
   const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+    },
+  });
+
+  io.on('connection', (socket) => {
+    console.log(socket.id);
+  });
   app.use(express.json({ limit: '10mb' }));
 
   app.get('/', (req, res) => {
@@ -34,7 +46,7 @@ async function server() {
   app.use(API_VERSION_URL, userFollowerRouter);
   app.use(API_VERSION_URL, fileImageRouter);
   const port = process.env.PORT || 3000;
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Listening to Port: ${port}`);
   });
 }
