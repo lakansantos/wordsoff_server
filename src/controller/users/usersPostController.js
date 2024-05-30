@@ -2,7 +2,7 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import Post from '../../models/posts/postModel.js';
 import User from '../../models/users/userModel.js';
 import { validationErrorMessageMapper } from '../../utils/string.js';
-import { deleteImage, uploadImage } from '../../utils/uploads.js';
+import { deleteImage } from '../../utils/uploads.js';
 
 const getPostsByUserName = async (req, res) => {
   const { userName } = req.params;
@@ -224,7 +224,7 @@ const editUserPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    const { genre, title, message, uploaded_image_path } = req.body;
+    const { genre, title, message, image } = req.body;
     const token_id = req.token_id;
 
     const author = await User.findOne({
@@ -239,16 +239,10 @@ const editUserPost = async (req, res) => {
 
     let image_file = null;
 
-    if (uploaded_image_path) {
-      const { url, public_id } = await uploadImage(
-        uploaded_image_path,
-        {
-          folder: 'posts',
-        },
-      );
+    if (image) {
       image_file = {
-        path: url,
-        public_id,
+        path: image.path,
+        public_id: image.public_id,
       };
     }
     const postToEdit = await Post.findOne({
@@ -263,10 +257,7 @@ const editUserPost = async (req, res) => {
     }
 
     // delete the image in the cloudinary whenever the user edited the photo
-    if (
-      (uploaded_image_path === null || uploaded_image_path) &&
-      postToEdit.image_file.public_id
-    ) {
+    if (postToEdit.image_file.public_id) {
       await deleteImage(postToEdit.image_file.public_id);
     }
 

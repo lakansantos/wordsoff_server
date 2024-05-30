@@ -15,13 +15,13 @@ const uploadFileImage = async (req, res) => {
     let image_file;
 
     if (file.path) {
-      const { url, public_id } = await uploadImage(file.path, {
+      const { secure_url, public_id } = await uploadImage(file.path, {
         folder: 'posts',
       });
 
       image_file = {
         public_id,
-        path: url,
+        path: secure_url,
       };
     }
     fs.unlinkSync(file.path);

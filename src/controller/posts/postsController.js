@@ -24,7 +24,6 @@ const addPost = async (req, res) => {
         public_id: image.public_id,
       };
 
-    console.log(image_file);
     const newPost = new Post({
       author,
       title,
