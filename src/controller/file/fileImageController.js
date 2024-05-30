@@ -16,7 +16,7 @@ const uploadFileImage = async (req, res) => {
 
     if (file.path) {
       const { secure_url, public_id } = await uploadImage(file.path, {
-        folder: 'posts',
+        folder: 'wordsoff',
       });
 
       image_file = {
