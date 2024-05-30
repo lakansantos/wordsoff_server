@@ -2,7 +2,7 @@ import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
 import User from '../../models/users/userModel.js';
 import bcrypt from 'bcryptjs';
 import { validationErrorMessageMapper } from '../../utils/string.js';
-import { deleteImage, uploadImage } from '../../utils/uploads.js';
+import { deleteImage } from '../../utils/uploads.js';
 import checkFieldValidator from '../../utils/checkFieldsValidator.js';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
@@ -205,8 +205,7 @@ const uploadProfileImage = async (req, res) => {
   const token_id = req.token_id;
 
   try {
-    const { uploaded_profile_image } = req.body;
-    let profile_image = null;
+    const { image } = req.body;
 
     const thisUser = await User.findById(token_id);
 
@@ -216,20 +215,11 @@ const uploadProfileImage = async (req, res) => {
       });
     }
 
-    if (uploaded_profile_image) {
-      const { url, public_id } = await uploadImage(
-        uploaded_profile_image,
-        {
-          transformation: {
-            width: 500,
-            height: 500,
-          },
-          folder: 'profile_images',
-        },
-      );
-      profile_image = {
-        path: url,
-        public_id,
+    let image_file = null;
+    if (image) {
+      image_file = {
+        path: image.path,
+        public_id: image.public_id,
       };
     }
 
@@ -238,7 +228,7 @@ const uploadProfileImage = async (req, res) => {
       await deleteImage(thisUser.profile_image.public_id);
     }
 
-    thisUser.profile_image = profile_image;
+    thisUser.profile_image = image_file;
 
     await thisUser.save();
 
@@ -263,7 +253,7 @@ const uploadCoverPhotoImage = async (req, res) => {
   const token_id = req.token_id;
 
   try {
-    const { uploaded_cover_photo_image } = req.body;
+    const { image } = req.body;
 
     const thisUser = await User.findById(token_id);
 
@@ -274,14 +264,10 @@ const uploadCoverPhotoImage = async (req, res) => {
     }
 
     let cover_photo_image = null;
-    if (uploaded_cover_photo_image) {
-      const { url, public_id } = await uploadImage(
-        uploaded_cover_photo_image,
-        { folder: 'cover_photos' },
-      );
+    if (image) {
       cover_photo_image = {
-        path: url,
-        public_id,
+        path: image.path,
+        public_id: image.public_id,
       };
     }
 
