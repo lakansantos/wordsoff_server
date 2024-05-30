@@ -240,11 +240,18 @@ const editUserPost = async (req, res) => {
     let image_file = null;
 
     if (image) {
-      image_file = {
-        path: image.path,
-        public_id: image.public_id,
-      };
+      if (image.public_id && image.path) {
+        image_file = {
+          path: image.path,
+          public_id: image.public_id,
+        };
+      } else {
+        return res.status(400).json({
+          message: 'Both public_id and path are required.',
+        });
+      }
     }
+
     const postToEdit = await Post.findOne({
       post_id: postId,
       author: author._id,
