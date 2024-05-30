@@ -55,7 +55,6 @@ const userSchema = new mongoose.Schema(
     },
     last_logged_in: {
       type: Date,
-      default: null,
     },
     about: {
       type: String,

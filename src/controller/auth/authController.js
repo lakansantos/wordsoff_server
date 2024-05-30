@@ -27,7 +27,7 @@ const loginUser = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: 'User does not exist.',
+        message: 'Incorrect user name or password.',
       });
     }
 
@@ -37,14 +37,14 @@ const loginUser = async (req, res) => {
     );
     if (!isValidPassword) {
       return res.status(401).json({
-        message: 'Incorrect Password',
+        message: 'Incorrect user name or password.',
       });
     }
 
-    const selectedUser = await User.findOneAndUpdate(
-      { user_name },
-      { last_logged_in: new Date() },
-    );
+    const selectedUser = await User.findOne({ user_name });
+
+    selectedUser.last_logged_in = new Date();
+    selectedUser.save();
 
     return res.status(201).json({
       user_id: selectedUser.user_id,
