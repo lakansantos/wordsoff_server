@@ -9,17 +9,14 @@ PORT=
 MONGODB_CONNECT_URI=
 JWT_SECRET=
 API_VERSION=
-````
-
-
-
-This project uses [Cloudinary](https://cloudinary.com/), and [MongoDB](https://mongodb.com/)
-Please visit their site documentation for api keys.
-````
 API_CLOUDINARY_SECRET=
 API_CLOUDINARY_KEY=
 API_CLOUD_NAME=
 ````
+
+This project uses [Cloudinary](https://cloudinary.com/), and [MongoDB](https://mongodb.com/)
+Please visit their site documentation for api keys.
+
 
 Next, run the development server:
 
