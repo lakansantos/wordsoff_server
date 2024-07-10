@@ -1,9 +1,14 @@
-const checkFieldsValidator = (missingFields, req) => {
-  const fields = [];
+import { Request } from 'express';
+
+const checkFieldsValidator = (
+  missingFields: string[],
+  req: Request,
+) => {
+  const fields: string[] = [];
 
   let hasMissingFields;
   let errorMessage;
-  missingFields.map((field) => {
+  missingFields.map((field: string) => {
     if (!req.body[field]) {
       fields.push(field);
     }

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const imageSchema = mongoose.Schema({
+const imageSchema = new mongoose.Schema({
   uploader: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

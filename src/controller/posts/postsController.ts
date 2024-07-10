@@ -1,9 +1,12 @@
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import Post from '../../models/posts/postModel.js';
-import User from '../../models/users/userModel.js';
-import { validationErrorMessageMapper } from '../../utils/string.js';
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import Post from '@models/posts/postModel';
 
-const addPost = async (req, res) => {
+import User from '@models/users/userModel';
+import { validationErrorMessageMapper } from '@utils/string';
+
+import { Request, Response } from 'express';
+
+const addPost = async (req: Request, res: Response) => {
   const token_id = req.token_id;
   const { title, message, genre, image } = req.body;
 
@@ -57,14 +60,15 @@ const addPost = async (req, res) => {
       data: newPost,
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    const validationError = error as Fetch.Errors;
+    if (validationError.name === 'ValidationError') {
       return res.status(400).json({
-        message: validationErrorMessageMapper(error),
+        message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
 
     // for image file upload error handling
-    if (error.message === 'ENOENT') {
+    if (validationError.message === 'ENOENT') {
       return res.status(500).json({
         message: 'Selected file path do not exist',
       });
@@ -75,11 +79,11 @@ const addPost = async (req, res) => {
   }
 };
 
-const getPosts = async (req, res) => {
+const getPosts = async (req: Request, res: Response) => {
   try {
     const { search, limit = 5, offset = 0 } = req.query;
 
-    const regexPattern = new RegExp(search, 'i');
+    const regexPattern = new RegExp(search as string, 'i');
 
     const query = search
       ? {
@@ -90,8 +94,8 @@ const getPosts = async (req, res) => {
         }
       : {};
 
-    const _limit = parseInt(limit);
-    const _offset = parseInt(offset);
+    const _limit = parseInt(limit as string);
+    const _offset = parseInt(offset as string);
     const response = await Post.aggregate([
       { $match: query },
       {
@@ -161,7 +165,7 @@ const getPosts = async (req, res) => {
   }
 };
 
-const getPostById = async (req, res) => {
+const getPostById = async (req: Request, res: Response) => {
   try {
     const { postId } = req.params;
     const post = await Post.findOne({

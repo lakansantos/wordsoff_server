@@ -1,0 +1,8 @@
+{
+  "restartable": "rs",
+  "ignore": [".git", "node_modules/**/node_modules"],
+  "verbose": true,
+  "exec": "ts-node --files -r tsconfig-paths/register ./server.ts",
+  "watch": ["./server.ts", "./src/*"],
+  "ext": "ts"
+}

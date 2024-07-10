@@ -1,8 +1,9 @@
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import Follower from '../../models/users/userFollowerModel.js';
-import User from '../../models/users/userModel.js';
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import Follower from '@models/users/userFollowerModel';
+import User from '@models/users/userModel';
+import { Request, Response } from 'express';
 
-const followUser = async (req, res) => {
+const followUser = async (req: Request, res: Response) => {
   try {
     const { targetUserName } = req.params;
 
@@ -85,7 +86,7 @@ const followUser = async (req, res) => {
   }
 };
 
-const unfollowUser = async (req, res) => {
+const unfollowUser = async (req: Request, res: Response) => {
   const token_id = req.token_id;
 
   try {
@@ -156,7 +157,7 @@ const unfollowUser = async (req, res) => {
   }
 };
 
-const getUserFollowers = async (req, res) => {
+const getUserFollowers = async (req: Request, res: Response) => {
   try {
     const { targetUserName } = req.params;
 
@@ -170,13 +171,13 @@ const getUserFollowers = async (req, res) => {
 
     const { search, limit = 5, offset = 0 } = req.query;
 
-    const regexSearch = new RegExp(search, 'i');
+    const regexSearch = new RegExp(search as string, 'i');
 
     const query = search
       ? { follower_user_name: { $regex: regexSearch } }
       : {};
 
-    const _limit = parseInt(limit);
+    const _limit = parseInt(limit as string);
 
     const [{ meta = {}, data = [] }] = await Follower.aggregate([
       {
@@ -202,9 +203,9 @@ const getUserFollowers = async (req, res) => {
             },
           ],
           data: [
-            { $skip: _limit * offset },
+            { $skip: _limit * parseInt(offset as string) },
             { $sort: { date_followed: -1 } },
-            { $limit: limit },
+            { $limit: _limit },
             {
               $lookup: {
                 from: 'users',
@@ -245,7 +246,7 @@ const getUserFollowers = async (req, res) => {
   }
 };
 
-const getUserFollowing = async (req, res) => {
+const getUserFollowing = async (req: Request, res: Response) => {
   try {
     const { targetUserName } = req.params;
 
@@ -256,9 +257,9 @@ const getUserFollowing = async (req, res) => {
 
     const { search, offset = 0, limit = 5 } = req.query;
 
-    const _limit = parseInt(limit);
+    const _limit = parseInt(limit as string);
 
-    const regexSearch = new RegExp(search, 'i');
+    const regexSearch = new RegExp(search as string, 'i');
     const query = search
       ? {
           followed_user_name: { $regex: regexSearch },
@@ -279,7 +280,7 @@ const getUserFollowing = async (req, res) => {
             {
               $addFields: {
                 limit: _limit,
-                offset: parseInt(offset),
+                offset: parseInt(offset as string),
                 total_pages: {
                   $ceil: {
                     $divide: ['$total_rows', _limit],
@@ -289,7 +290,7 @@ const getUserFollowing = async (req, res) => {
             },
           ],
           data: [
-            { $skip: parseInt(offset) * _limit },
+            { $skip: parseInt(offset as string) * _limit },
             { $sort: { date_followed: -1 } },
             { $limit: _limit },
             {

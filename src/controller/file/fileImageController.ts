@@ -1,9 +1,11 @@
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import { uploadImage } from '../../utils/uploads.js';
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import { uploadImage } from '@utils/uploadImage';
+
+import { Request, Response } from 'express';
 
 import fs from 'fs';
 
-const uploadFileImage = async (req, res) => {
+const uploadFileImage = async (req: Request, res: Response) => {
   try {
     const file = req.file;
 
