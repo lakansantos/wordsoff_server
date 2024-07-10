@@ -1,11 +1,14 @@
-import { v2 as cloudinary } from 'cloudinary';
 import {
   API_CLOUD_NAME,
   API_CLOUDINARY_KEY,
   API_CLOUDINARY_SECRET,
-} from '../config/environment.js';
+} from '@configs/environment';
+import { v2 as cloudinary, UploadApiOptions } from 'cloudinary';
 
-const uploadImage = async (imagePath, options) => {
+const uploadImage = async (
+  imagePath: string,
+  options: UploadApiOptions,
+) => {
   try {
     // Configuration
     cloudinary.config({
@@ -33,10 +36,10 @@ const uploadImage = async (imagePath, options) => {
       url,
     };
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e as string);
   }
 };
-const deleteImage = async (public_id) => {
+const deleteImage = async (public_id: string) => {
   try {
     // Configuration
     cloudinary.config({
@@ -47,7 +50,7 @@ const deleteImage = async (public_id) => {
 
     await cloudinary.uploader.destroy(public_id);
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e as string);
   }
 };
 

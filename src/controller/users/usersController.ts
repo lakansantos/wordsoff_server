@@ -1,22 +1,24 @@
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import User from '../../models/users/userModel.js';
+import { Request, Response } from 'express';
+
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import User from '@models/users/userModel';
 import bcrypt from 'bcryptjs';
-import { validationErrorMessageMapper } from '../../utils/string.js';
-import { deleteImage } from '../../utils/uploads.js';
-import checkFieldValidator from '../../utils/checkFieldsValidator.js';
+import { validationErrorMessageMapper } from '@utils/string';
+import { deleteImage } from '@utils/uploadImage';
+import checkFieldsValidator from '@utils/checkFieldsValidator';
 
 const excludedFields = { password: 0, _id: 0, __v: 0 };
 
-const getUsers = async (req, res) => {
+const getUsers = async (req: Request, res: Response) => {
   try {
     const { limit = 5, offset = 0, search } = req.query;
 
-    const regexSearch = new RegExp(search, 'i');
+    const regexSearch = new RegExp(search as string, 'i');
     const query = search
       ? { user_name: { $regex: regexSearch } }
       : {};
 
-    const _limit = parseInt(limit);
+    const _limit = parseInt(limit as string);
     const response = await User.aggregate([
       { $match: query },
       {
@@ -29,7 +31,7 @@ const getUsers = async (req, res) => {
                   $ceil: { $divide: ['$total_rows', _limit] },
                 },
                 limit: _limit,
-                offset: parseInt(offset),
+                offset: parseInt(offset as string),
               },
             },
           ],
@@ -53,7 +55,7 @@ const getUsers = async (req, res) => {
             {
               $sort: { created_at: -1 },
             },
-            { $skip: offset * _limit },
+            { $skip: parseInt(offset as string) * _limit },
             { $limit: _limit },
             {
               $project: {
@@ -85,7 +87,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const registerUser = async (req, res) => {
+const registerUser = async (req: Request, res: Response) => {
   try {
     const { user_name, gender, about, birth_date, password } =
       req.body;
@@ -157,13 +159,14 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    const validationError = error as Fetch.Errors;
+    if (validationError.name === 'ValidationError') {
       return res.status(400).json({
-        message: validationErrorMessageMapper(error),
+        message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
     // for image file upload error handling
-    if (error.message === 'ENOENT') {
+    if (validationError.message === 'ENOENT') {
       return res.status(500).json({
         message: 'Selected file path do not exist',
       });
@@ -174,7 +177,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const viewUser = async (req, res) => {
+const viewUser = async (req: Request, res: Response) => {
   const { userName } = req.params;
 
   try {
@@ -201,7 +204,7 @@ const viewUser = async (req, res) => {
   }
 };
 
-const uploadProfileImage = async (req, res) => {
+const uploadProfileImage = async (req: Request, res: Response) => {
   const token_id = req.token_id;
 
   try {
@@ -242,8 +245,9 @@ const uploadProfileImage = async (req, res) => {
       data: thisUser,
     });
   } catch (error) {
+    const validationError = error as Fetch.Errors;
     // for image file upload error handling
-    if (error.message === 'ENOENT') {
+    if (validationError.message === 'ENOENT') {
       return res.status(500).json({
         message: 'Selected file path do not exist',
       });
@@ -255,7 +259,7 @@ const uploadProfileImage = async (req, res) => {
   }
 };
 
-const uploadCoverPhotoImage = async (req, res) => {
+const uploadCoverPhotoImage = async (req: Request, res: Response) => {
   const token_id = req.token_id;
 
   try {
@@ -296,8 +300,9 @@ const uploadCoverPhotoImage = async (req, res) => {
       data: thisUser,
     });
   } catch (error) {
+    const validationError = error as Fetch.Errors;
     // for image file upload error handling
-    if (error.message === 'ENOENT') {
+    if (validationError.message === 'ENOENT') {
       return res.status(500).json({
         message: 'Selected file path do not exist',
       });
@@ -309,7 +314,7 @@ const uploadCoverPhotoImage = async (req, res) => {
   }
 };
 
-const editUserDetails = async (req, res) => {
+const editUserDetails = async (req: Request, res: Response) => {
   const token_id = req.token_id;
   try {
     const { gender, birth_date, about } = req.body;
@@ -318,7 +323,7 @@ const editUserDetails = async (req, res) => {
 
     const fieldsKey = Object.keys(requiredFields);
 
-    const { hasMissingFields, errorMessage } = checkFieldValidator(
+    const { hasMissingFields, errorMessage } = checkFieldsValidator(
       fieldsKey,
       req,
     );
@@ -352,9 +357,10 @@ const editUserDetails = async (req, res) => {
   } catch (error) {
     console.log(error);
 
-    if (error.name === 'ValidationError') {
+    const validationError = error as Fetch.Errors;
+    if (validationError.name === 'ValidationError') {
       return res.status(400).json({
-        message: validationErrorMessageMapper(error),
+        message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
 

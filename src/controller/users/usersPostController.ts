@@ -1,16 +1,18 @@
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import Post from '../../models/posts/postModel.js';
-import User from '../../models/users/userModel.js';
-import { validationErrorMessageMapper } from '../../utils/string.js';
-import { deleteImage } from '../../utils/uploads.js';
+import { Request, Response } from 'express';
 
-const getPostsByUserName = async (req, res) => {
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import Post from '@models/posts/postModel';
+import User from '@models/users/userModel';
+import { validationErrorMessageMapper } from '@utils/string';
+import { deleteImage } from '@utils/uploadImage';
+
+const getPostsByUserName = async (req: Request, res: Response) => {
   const { userName } = req.params;
 
   try {
     const { search, limit = 5, offset = 0 } = req.query;
 
-    const regexPattern = new RegExp(search, 'i');
+    const regexPattern = new RegExp(search as string, 'i');
     const query = search
       ? {
           $or: [
@@ -28,7 +30,7 @@ const getPostsByUserName = async (req, res) => {
       });
     }
 
-    const _limit = parseInt(limit);
+    const _limit = parseInt(limit as string);
 
     const [{ data = [], meta = {} }] = await Post.aggregate([
       { $match: { ...query, author: user._id } },
@@ -39,7 +41,7 @@ const getPostsByUserName = async (req, res) => {
             {
               $addFields: {
                 limit: _limit,
-                offset: parseInt(offset),
+                offset: parseInt(offset as string),
                 total_pages: {
                   $ceil: {
                     $divide: ['$total_rows', _limit],
@@ -50,7 +52,11 @@ const getPostsByUserName = async (req, res) => {
           ],
           data: [
             { $sort: { created_at: -1 } },
-            { $skip: offset * limit },
+            {
+              $skip:
+                parseInt(offset as string) *
+                parseInt(limit as string),
+            },
             { $limit: _limit },
             {
               $lookup: {
@@ -102,12 +108,15 @@ const getPostsByUserName = async (req, res) => {
  * @returns
  */
 
-const getPostsByLoggedInUser = async (req, res) => {
+const getPostsByLoggedInUser = async (
+  req: Request,
+  res: Response,
+) => {
   const token_id = req.token_id;
   try {
     const { search, limit = 5, offset = 0 } = req.query;
 
-    const regexPattern = new RegExp(search, 'i');
+    const regexPattern = new RegExp(search as string, 'i');
     const query = search
       ? {
           $or: [
@@ -125,7 +134,7 @@ const getPostsByLoggedInUser = async (req, res) => {
       });
     }
 
-    const _limit = parseInt(limit);
+    const _limit = parseInt(limit as string);
 
     const [{ data = [], meta = {} }] = await Post.aggregate([
       { $match: { ...query, author: user._id } },
@@ -136,7 +145,7 @@ const getPostsByLoggedInUser = async (req, res) => {
             {
               $addFields: {
                 limit: _limit,
-                offset: parseInt(offset),
+                offset: parseInt(offset as string),
                 total_pages: {
                   $ceil: {
                     $divide: ['$total_rows', _limit],
@@ -147,7 +156,11 @@ const getPostsByLoggedInUser = async (req, res) => {
           ],
           data: [
             { $sort: { created_at: -1 } },
-            { $skip: offset * limit },
+            {
+              $skip:
+                parseInt(offset as string) *
+                parseInt(limit as string),
+            },
             { $limit: _limit },
             {
               $lookup: {
@@ -189,7 +202,7 @@ const getPostsByLoggedInUser = async (req, res) => {
     });
   }
 };
-const deletePostPermanently = async (req, res) => {
+const deletePostPermanently = async (req: Request, res: Response) => {
   try {
     const { postId } = req.params;
     const userLoggedInTokenId = req.token_id;
@@ -220,7 +233,7 @@ const deletePostPermanently = async (req, res) => {
   }
 };
 
-const editUserPost = async (req, res) => {
+const editUserPost = async (req: Request, res: Response) => {
   try {
     const { postId } = req.params;
 
@@ -281,14 +294,15 @@ const editUserPost = async (req, res) => {
       message: postToEdit,
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    const validationError = error as Fetch.Errors;
+    if (validationError.name === 'ValidationError') {
       return res.status(400).json({
-        message: validationErrorMessageMapper(error),
+        message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
 
     // for image file upload error handling
-    if (error.message === 'ENOENT') {
+    if (validationError.message === 'ENOENT') {
       return res.status(500).json({
         message: 'Selected file path do not exist',
       });

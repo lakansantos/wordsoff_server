@@ -1,15 +1,16 @@
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../../config/environment.js';
-import User from '../../models/users/userModel.js';
-import { SERVER_ERROR_MESSAGE } from '../../config/constant.js';
-import { validationErrorMessageMapper } from '../../utils/string.js';
+import bcrypt from 'bcryptjs';
+import { JWT_SECRET_KEY } from '@configs/environment';
+import User from '@models/users/userModel';
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import { validationErrorMessageMapper } from '@utils/string';
+import { Request, Response } from 'express';
 
-const convertToToken = (data) => {
-  return jwt.sign(data, JWT_SECRET_KEY);
+const convertToToken = (data: { token_id: string }) => {
+  return jwt.sign(data, JWT_SECRET_KEY as string);
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req: Request, res: Response) => {
   const date = new Date(req.rateLimit.resetTime);
   req.rateLimit.resetTime = date.toLocaleTimeString();
 
@@ -52,9 +53,10 @@ const loginUser = async (req, res) => {
       token: convertToToken({ token_id: user._id }),
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    const validationError = error as Error;
+    if (validationError.name === 'ValidationError') {
       return res.status(400).json({
-        message: validationErrorMessageMapper(error),
+        message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
     res.status(500).json({
@@ -63,19 +65,23 @@ const loginUser = async (req, res) => {
   }
 };
 
-const changeUserLoginPassword = async (req, res) => {
+const changeUserLoginPassword = async (
+  req: Request,
+  res: Response,
+) => {
   try {
     const token_id = req.token_id;
 
     const user = await User.findOne({ _id: token_id }).select(
       '+password',
     );
+
     const { currentPassword, newPassword, confirmPassword } =
       req.body;
 
-    const missingFields = [];
+    const missingFields: string[] = [];
 
-    [('currentPassword', 'newPassword', 'confirmPassword')].map(
+    ['currentPassword', 'newPassword', 'confirmPassword'].map(
       (field) => {
         if (!req.body[field]) {
           missingFields.push(field);
