@@ -1,29 +1,16 @@
-import nodemailer from 'nodemailer';
+import User from '@models/users/userModel';
+import sendOTP from '@utils/sendOTP';
 import { Request, Response } from 'express';
-import { EMAIL_PASS, EMAIL_USER } from '@configs/environment';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-const sendEmailMessage = async (req: Request, res: Response) => {
+const sendOTPController = async (req: Request, res: Response) => {
   const { email_receiver } = req.body;
+  const token_id = req.token_id;
+
   try {
-    console.log(email_receiver);
-    const info = await transporter.sendMail({
-      from: `${EMAIL_USER}`,
-      to: email_receiver,
-      subject: 'Hello ✔', // Subject line
-      text: 'Hello world?', // plain text body
-      html: '<b>Hello world?</b>', // html body
-    });
+    const loggedInUser = await User.findById(token_id);
+
+    const user_name = loggedInUser.user_name;
+    const info = await sendOTP(user_name, email_receiver);
 
     return res.status(200).json({
       info,
@@ -35,4 +22,4 @@ const sendEmailMessage = async (req: Request, res: Response) => {
   }
 };
 
-export default sendEmailMessage;
+export default sendOTPController;
