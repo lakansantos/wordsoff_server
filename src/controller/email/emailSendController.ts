@@ -10,10 +10,10 @@ const sendOTPController = async (req: Request, res: Response) => {
     const loggedInUser = await User.findById(token_id);
 
     const user_name = loggedInUser.user_name;
-    const info = await sendOTP(user_name, email_receiver);
+    await sendOTP(user_name, email_receiver);
 
     return res.status(200).json({
-      info,
+      message: 'OTP sent to email successfully',
     });
   } catch (error) {
     return res.status(500).json({

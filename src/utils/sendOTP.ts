@@ -19,6 +19,7 @@ const transporter = nodemailer.createTransport({
 const sendOTP = async (
   user_name: string,
   recepient_email: string,
+  text = "You requested to send OTP in your Wordsoff account. If it wasn't you, please reset your account immediately",
 ) => {
   const otp = generateOTP();
   try {
@@ -26,19 +27,18 @@ const sendOTP = async (
       from: `${EMAIL_USER}`,
       to: recepient_email,
       subject: 'OTP Request',
-      text: "You requested to send OTP in your Wordsoff account. If it wasn't you, please reset your account immediately",
+      text: `Your code is ${otp}`,
       html: `
         <div>
-      <p>Hi ${user_name}, </p> <br>
-
-      <p>You requested to send OTP in your Wordsoff account. If it wasn't you, please reset your account immediately</p>
+      <p>Hi ${user_name}, </p> 
+      <p>${text}</p>
         <b> 
       ${otp}
       </b>
         </div>
         `, // html body
     });
-    return info;
+    return { info, otp };
   } catch (error) {
     throw new Error(error as string);
   }

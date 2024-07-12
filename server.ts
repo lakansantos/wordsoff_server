@@ -11,6 +11,7 @@ import usersRouter from '@routes/users/users';
 import userPostsRouter from '@routes/users/userPostsRouter';
 import filesImageRouter from '@routes/files/filesImageRouter';
 import emailSendRouter from '@routes/email/emailSendRouter';
+import usersAddEmailRouter from '@routes/users/usersAddEmailRouter';
 
 async function server() {
   dotenv.config();
@@ -34,6 +35,7 @@ async function server() {
   app.use(API_VERSION_URL, userFollowerRouter);
   app.use(API_VERSION_URL, filesImageRouter);
   app.use(API_VERSION_URL, emailSendRouter);
+  app.use(API_VERSION_URL, usersAddEmailRouter);
   const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`Listening to Port: ${port}`);
