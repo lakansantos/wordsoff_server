@@ -1,3 +1,4 @@
+import { SERVER_ERROR_MESSAGE } from '@configs/constant';
 import User from '@models/users/userModel';
 import sendOTP from '@utils/sendOTP';
 import {
@@ -8,7 +9,11 @@ import {
 import { Request, Response } from 'express';
 
 type OTPStorageType = {
-  [key: string]: { otp: string; timestamp: number };
+  [key: string]: {
+    otp: string;
+    timestamp: number;
+    expiration: number;
+  };
 };
 const OTPStorage: OTPStorageType = {};
 
@@ -26,6 +31,16 @@ const userSendOTPToEmail = async (req: Request, res: Response) => {
       return res.status(400).json({ message: REGEXP_FEEDBACK.email });
     }
 
+    const isEmailAlreadyTaken = await User.findOne({
+      email: email_to_add,
+    });
+
+    if (isEmailAlreadyTaken) {
+      return res.status(400).json({
+        message:
+          'This email is already taken. Please use another email.',
+      });
+    }
     if (!REGEXP['email'].test(email_to_add as string)) {
       return res
         .status(400)
@@ -34,13 +49,19 @@ const userSendOTPToEmail = async (req: Request, res: Response) => {
 
     const { otp } = await sendOTP(user_name, email_to_add);
 
-    OTPStorage[email_to_add] = { otp, timestamp: Date.now() };
-    console.log(OTPStorage);
+    OTPStorage[email_to_add] = {
+      otp,
+      timestamp: Date.now(),
+      expiration: Date.now() + 1 * 60 * 1000, // 1 minute
+    };
+
     return res.status(200).json({
       message: 'OTP sent successfully.',
     });
   } catch (error) {
-    return res.status(500).json(error);
+    return res.status(500).json({
+      SERVER_ERROR_MESSAGE,
+    });
   }
 };
 
@@ -50,11 +71,8 @@ const userVerifyOTPEmail = async (req: Request, res: Response) => {
   try {
     const token_id = req.token_id;
 
-    console.log(email_to_verify);
-    console.log(OTPStorage);
-    console.log(OTPStorage[email_to_verify]);
-
     const emailData = OTPStorage[email_to_verify];
+
     if (!emailData) {
       return res.status(400).json({
         message: 'Invalid Email Recipient. Please try again',
@@ -67,7 +85,8 @@ const userVerifyOTPEmail = async (req: Request, res: Response) => {
       });
     }
 
-    if (emailData.timestamp < Date.now()) {
+    if (emailData.expiration <= Date.now()) {
+      delete OTPStorage[email_to_verify];
       return res.status(400).json({
         message: 'OTP Expired. Please generate again. ',
       });
@@ -79,7 +98,6 @@ const userVerifyOTPEmail = async (req: Request, res: Response) => {
 
     delete OTPStorage[email_to_verify];
 
-    console.log(OTPStorage);
     return res.status(200).json({
       message: 'Added Email successfully!',
     });
