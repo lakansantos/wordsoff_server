@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 const sendOTP = async (
   user_name: string,
   recepient_email: string,
-  text = "You requested to send OTP in your Wordsoff account. If it wasn't you, please reset your account immediately",
+  headerText = "You requested to send OTP in your Wordsoff account. If it wasn't you, please reset your account immediately",
 ) => {
   const otp = generateOTP();
   try {
@@ -31,12 +31,15 @@ const sendOTP = async (
       html: `
         <div>
       <p>Hi ${user_name}, </p> 
-      <p>${text}</p>
-        <b> 
-      ${otp}
-      </b>
+      <p>${headerText}</p>
+
+      <div style="border:2px solid #0077c0;max-width:80%;border-radius:10px;padding:10px 25px;text-align:center;font-size:32px;letter-spacing:14px;color:#0077c0;font-weight:600;margin:0 auto;margin-top:2rem;margin-bottom:2rem">${otp}</div>
+
+     <p><strong>*Please note that the code expires in 5 minutes.</strong></p>
+
+     <p>Do not share this OTP to anyone.</p>
         </div>
-        `, // html body
+        `,
     });
     return { info, otp };
   } catch (error) {
