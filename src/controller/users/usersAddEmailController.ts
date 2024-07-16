@@ -1,11 +1,8 @@
 import { SERVER_ERROR_MESSAGE } from '@configs/constant';
+import { REGEXP, REGEXP_FEEDBACK } from '@configs/validation';
 import User from '@models/users/userModel';
 import sendOTP from '@utils/sendOTP';
-import {
-  REGEXP_FEEDBACK,
-  REGEXP,
-  validationErrorMessageMapper,
-} from '@utils/string';
+import { validationErrorMessageMapper } from '@utils/string';
 import { Request, Response } from 'express';
 
 type OTPStorageType = {
