@@ -52,7 +52,7 @@ const userSendOTPToEmail = async (req: Request, res: Response) => {
     OTPStorage[email_to_add] = {
       otp,
       timestamp: Date.now(),
-      expiration: Date.now() + 1 * 60 * 1000, // 1 minute
+      expiration: Date.now() + 5 * 60 * 1000, // 5 minutes
     };
 
     return res.status(200).json({
@@ -108,6 +108,10 @@ const userVerifyOTPEmail = async (req: Request, res: Response) => {
         message: validationErrorMessageMapper(error as Fetch.Error),
       });
     }
+
+    return res.status(500).json({
+      message: SERVER_ERROR_MESSAGE,
+    });
   }
 };
 
