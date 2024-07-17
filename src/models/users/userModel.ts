@@ -59,6 +59,9 @@ const userSchema = new mongoose.Schema(
     last_logged_in: {
       type: Date,
     },
+    isOTPEnabled: {
+      type: Boolean,
+    },
     about: {
       type: String,
     },
